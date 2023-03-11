@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="RemoteRepositoriesConfiguration">
+    <remote-repository>
+      <option name="id" value="actor_ovs" />
+      <option name="name" value="server_actor_ovs" />
+      <option name="url" value="https://bloomy-ci.cloud/artifactory/actor-ovs-libraries" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="central6" />
+      <option name="name" value="server-6-releases" />
+      <option name="url" value="https://bloomy-ci.cloud/artifactory/actor-storm" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="spindox-transport" />
+      <option name="name" value="server_spindox-transport" />
+      <option name="url" value="https://bloomy-ci.cloud/artifactory/spindox-transport" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="central_maven3" />
+      <option name="name" value="central maven repo https" />
+      <option name="url" value="https://repo.maven.apache.org/maven2" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="maven_clojars" />
+      <option name="name" value="maven_clojars" />
+      <option name="url" value="https://clojars.org/repo/" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="maven2" />
+      <option name="name" value="maven2" />
+      <option name="url" value="https://repo1.maven.org/maven2" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="maven_geomajas" />
+      <option name="name" value="maven_geomajas" />
+      <option name="url" value="http://maven.geomajas.org/" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="snapshots2" />
+      <option name="name" value="server-2-snapshots" />
+      <option name="url" value="https://bloomy-ci.cloud/artifactory/actor-bloomy" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="snapshots1" />
+      <option name="name" value="server-1-snapshots" />
+      <option name="url" value="https://bloomy-ci.cloud/artifactory/actor-public" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="maven2-repository.dev.java.net" />
+      <option name="name" value="Java.net repository" />
+      <option name="url" value="https://download.java.net/maven/2" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="spindox-marr-libraries" />
+      <option name="name" value="server_spindox-marr-libraries" />
+      <option name="url" value="https://bloomy-ci.cloud/artifactory/spindox-marr-libraries" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="actor_public" />
+      <option name="name" value="server_actor_public" />
+      <option name="url" value="https://bloomy-ci.cloud/artifactory/actor-public" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="central3" />
+      <option name="name" value="server-3-releases" />
+      <option name="url" value="https://bloomy-ci.cloud/artifactory/actor-heimdall" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="apache" />
+      <option name="name" value="apache" />
+      <option name="url" value="https://repository.apache.org/content/repositories/releases/" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="spindox-optslotting" />
+      <option name="name" value="server_spindox-optslotting" />
+      <option name="url" value="https://bloomy-ci.cloud/artifactory/spindox-optslotting" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="central5" />
+      <option name="name" value="server-5-releases" />
+      <option name="url" value="https://bloomy-ci.cloud/artifactory/actor-before" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="central1" />
+      <option name="name" value="server-1-releases" />
+      <option name="url" value="https://bloomy-ci.cloud/artifactory/actor-public" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="jboss.community" />
+      <option name="name" value="JBoss Community repository" />
+      <option name="url" value="https://repository.jboss.org/nexus/content/repositories/public/" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="Jboss_1" />
+      <option name="name" value="Jboss_1" />
+      <option name="url" value="https://repository.jboss.org/nexus/content/repositories/thirdparty-releases/" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="osgeo" />
+      <option name="name" value="OSGeo Release Repository" />
+      <option name="url" value="https://repo.osgeo.org/repository/release/" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="vaadin-addons" />
+      <option name="name" value="vaadin-addons" />
+      <option name="url" value="http://maven.vaadin.com/vaadin-addons" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="snapshots3" />
+      <option name="name" value="server-3-snapshots" />
+      <option name="url" value="https://bloomy-ci.cloud/artifactory/actor-heimdall" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="central2" />
+      <option name="name" value="server-2-releases" />
+      <option name="url" value="https://bloomy-ci.cloud/artifactory/actor-bloomy" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="central" />
+      <option name="name" value="Central Repository" />
+      <option name="url" value="https://repo.maven.apache.org/maven2" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="central" />
+      <option name="name" value="Maven Central repository" />
+      <option name="url" value="https://repo1.maven.org/maven2" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="ublique" />
+      <option name="name" value="ublique" />
+      <option name="url" value="http://108.128.171.207/nexus/repository/ublique/" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="central_maven2" />
+      <option name="name" value="central_maven2" />
+      <option name="url" value="https://repo1.maven.org/maven2/" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="actor-optrunner" />
+      <option name="name" value="server_actor-optrunner" />
+      <option name="url" value="https://bloomy-ci.cloud/artifactory/actor-optrunner" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="osgeo-snapshot" />
+      <option name="name" value="OSGeo Snapshot Repository" />
+      <option name="url" value="https://repo.osgeo.org/repository/snapshot/" />
+    </remote-repository>
+  </component>
+</project>
