@@ -7,8 +7,7 @@ public class Vec2
 
     /* An instance of this class represents a point in a 2-dimensional space */
 
-    public int x;       // x coordinate
-    public int y;       // y coordinate
+    public int x, y;       // x and y coordinates
 
     public Vec2()
     {

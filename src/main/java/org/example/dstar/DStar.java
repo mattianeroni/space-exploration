@@ -17,7 +17,9 @@ public class DStar
     public float km;                           // Accumulation factor
     public Vec2 source, goal, current, last;   // Starting and ending positions, the current position where the robot is,
                                                // and the last position visited by the robot
-    //public int viewSize = 3;                 // How far the robot can see
+    //public List<Vec2> currentPath;             // The current shortest path from current to goal
+    public boolean changed = false;            // A flag that keeps track of changes after the last movement
+
 
     int[][] slam;         // The current knowledge of the environment the algorithm has
     float[][] rhs;        // The second level estimate of distance between nodes and goal
@@ -44,7 +46,30 @@ public class DStar
             Arrays.fill(rhs[i], Float.POSITIVE_INFINITY);
         }
 
-        rhs[source.x][source.y] = 0;
+        rhs[goal.x][goal.y] = 0.0f;
+        HeapNode hn = computeHeapNode(goal);
+        inconsistents.put(goal, hn);
+        heap.add(hn);
+    }
+
+
+    // The cost of moving from a position to a close position
+    public float moveCost(Vec2 p1, Vec2 p2)
+    {
+        // Same position
+        if (p1.equals(p2))
+            return 0.0f;
+
+        // Movement into obstacle
+        if (slam[p2.x][p2.y] == 1)
+            return Float.POSITIVE_INFINITY;
+
+        // Vertical or horizontal movement
+        if (p1.x == p2.x || p1.y == p2.y)
+            return 1.0f;
+
+        // Diagonal movement
+        return 1.414f;
     }
 
 
@@ -63,26 +88,99 @@ public class DStar
     // Make a step to the goal
     public void step ()
     {
+        // Verify if something has changed to increase the accumulation factor
+        if (changed)
+        {
+            changed = false;
+            km += moveCost(last, current);
+            computePath();
+        }
+
+
+
         // Move to the position that corresponds to the shortest path to the goal
-        List<Vec2> nextNodes = getNeighbours(current);
         Vec2 nextNode = null;
         float minCost = Float.POSITIVE_INFINITY;
 
-        for (Vec2 node : nextNodes) {
-            float cost = (node.x == current.x || node.y == current.y) ? 1.0f : 1.414f;
+        for (Vec2 node : getNeighbours(current)) {
+            float cost = moveCost(current, node);
             if (cost + g[node.x][node.y] < minCost) {
                 minCost = cost + g[node.x][node.y];
                 nextNode = node;
             }
         }
-
+        last = current;
         current = nextNode;
+
+    }
+
+
+    // Compute the shortest path to the goal according to the current knowledge of the environment
+    public void computePath()
+    {
+        while (
+                heap.peek() != null &&
+                (heap.peek().compareTo(computeHeapNode(current)) < 0  ||  rhs[current.x][current.y] > g[current.x][current.y])
+        )
+        {
+            HeapNode node = heap.poll();
+            Vec2 position = node.position;
+            HeapNode newNode = computeHeapNode(position);
+
+            if (node.compareTo(newNode) < 0) {
+
+                heap.add(newNode);
+                inconsistents.put(position, newNode);
+
+            } else if (g[position.x][position.y] > rhs[position.x][position.y]){
+
+                g[position.x][position.y] = rhs[position.x][position.y];
+                inconsistents.remove(position);
+                for (Vec2 i : getNeighbours(position))
+                    updateVertex(i);
+
+            } else {
+
+                float g_old = g[position.x][position.y];
+                g[position.x][position.y] = Float.POSITIVE_INFINITY;
+                updateVertex(position);
+                for (Vec2 i : getNeighbours(position))
+                    updateVertex(i);
+
+            }
+        }
+    }
+
+
+    public List<Vec2> extractPath()
+    {
+        List<Vec2> path = new ArrayList<>();
+        path.add(current);
+        Vec2 cNode = current;
+
+        while (cNode != goal)
+        {
+            Vec2 minNode = null;
+            float minCost = Float.POSITIVE_INFINITY;
+            for (Vec2 next : getNeighbours(cNode)){
+                if (g[next.x][next.y] < minCost){
+                    minCost = g[next.x][next.y];
+                    minNode = next;
+                }
+            }
+            path.add(minNode);
+            cNode = minNode;
+        }
+
+        path.add(goal);
+        return path;
     }
 
 
     // Add a new obstacle to the slam
     public void addObstacle (Vec2 position)
     {
+        changed = true;
         slam[position.x][position.y] = 1;
         g[position.x][position.y] = Float.POSITIVE_INFINITY;
         rhs[position.x][position.y] = Float.POSITIVE_INFINITY;
@@ -94,6 +192,7 @@ public class DStar
     // Remove an obstacle from the slam
     public void removeObstacle (Vec2 position)
     {
+        changed = true;
         slam[position.x][position.y] = 0;
         updateVertex(position);
         for (Vec2 pos : getNeighbours(current))
@@ -101,7 +200,7 @@ public class DStar
     }
 
 
-    public void updateVertex(Vec2 position)
+    public void updateVertex (Vec2 position)
     {
         int x = position.x, y = position.y;
 
@@ -109,10 +208,9 @@ public class DStar
         if (!position.equals(goal))
         {
             rhs[x][y] = Float.POSITIVE_INFINITY;
-            for (Vec2 n : getNeighbours(position)) {
-                float cost = (n.x == x || n.y == y) ? 1.0f : 1.414f;
-                rhs[x][y] = Math.min(rhs[x][y], g[n.x][n.y] + cost);
-            }
+            for (Vec2 n : getNeighbours(position))
+                rhs[x][y] = Math.min(rhs[x][y], g[n.x][n.y] + moveCost(position, n));
+
         }
 
         // Remove from the heap (it will be re-added with updated costs if inconsistent - see next lines)
@@ -152,7 +250,6 @@ public class DStar
 
             }
         }
-
         return neighbours;
     }
 

@@ -82,16 +82,10 @@ public class Main
         Vec2 source = new Vec2(0, 0);
         Vec2 goal = new Vec2(90, 90);
 
-        // https://github.com/zhm-real/PathPlanning/blob/master/Search_based_Planning/Search_2D/D_star_Lite.py
-
-        Map<Vec2, Integer> map = new HashMap<>();
-        map.put(source, 0);
-        //map.put(goal, 1);
-        System.out.println(map.get(goal));
 
         DStar dstar = new DStar(source, goal, grid);
-        //Plotter plt = new Plotter(dstar, grid, 3);
-        //PApplet.runSketch(new String[]{"ProcessingTest"}, plt);
+        Plotter plt = new Plotter(dstar, grid, 5);
+        PApplet.runSketch(new String[]{"ProcessingTest"}, plt);
 
     }
 }

@@ -3,22 +3,20 @@ package org.example;
 import org.example.dstar.DStar;
 import processing.core.PApplet;
 
+import java.util.List;
 
-public class Plotter  extends PApplet {
-    // Define the grid size
-    int nCellsX, nCellsY;
-    int cellSize;
 
-    // The path finding algorithm
-    DStar dstar = null;
+public class Plotter  extends PApplet
+{
 
-    // Frames per second
-    int fps = 100;
+    int nCellsX, nCellsY;       // The number of cells in row and column
+    int cellSize;               // The size of a cell
+    DStar dstar;                // The path finding algorithm
+    int fps = 100;              // Frames per second
+    int[][] grid;               // The binary grid of obstacles
 
-    // The grid
-    int[][] grid;
-
-    public Plotter(DStar dstar, int[][] grid, int cellSize){
+    public Plotter(DStar dstar, int[][] grid, int cellSize)
+    {
         this.dstar = dstar;
         this.cellSize = cellSize;
         this.nCellsX = grid.length;
@@ -26,7 +24,8 @@ public class Plotter  extends PApplet {
         this.grid = grid;
     }
 
-    public Plotter(DStar dstar, int[][] grid, int cellSize, int fps){
+    public Plotter(DStar dstar, int[][] grid, int cellSize, int fps)
+    {
         this.dstar = dstar;
         this.cellSize = cellSize;
         this.nCellsX = grid.length;
@@ -35,29 +34,41 @@ public class Plotter  extends PApplet {
         this.grid = grid;
     }
 
-    public void settings(){
+
+    public void settings()
+    {
         size(cellSize * nCellsX, cellSize * nCellsY);
     }
 
-    public void setup(){
-        background(220);
-        //fill(120);
-        strokeWeight(1);  // Default 4
 
-        // Render grid
+    public void setup()
+    {
+        background(220);
+        strokeWeight(1);  // Default 4
+        dstar.step();
+        dstar.computePath();
+        List<Vec2> path = dstar.extractPath();
         renderBinaryGrid();
+        renderPath(path);
     }
 
-    public void draw(){background(220);
+    public void draw()
+    {
         background(220);
         strokeWeight(1);  // Default 4
+        dstar.step();
+        dstar.computePath();
+        List<Vec2> path = dstar.extractPath();
         renderBinaryGrid();
+        renderPath(path);
+
     }
 
 
     // When right button is clicked, the robot make a movement
     // When left button is clicked an obstacle is added / removed
-    public void mousePressed () {
+    public void mousePressed ()
+    {
         if (mouseButton == RIGHT)
         {
             dstar.step();
@@ -84,7 +95,8 @@ public class Plotter  extends PApplet {
 
 
     // Render the binary obstacles map
-    public void renderBinaryGrid(){
+    public void renderBinaryGrid()
+    {
         for (int i = 0; i < grid.length ; i++){
             for (int j = 0; j < grid[0].length; j++){
                 if (grid[i][j] == 1){
@@ -94,6 +106,17 @@ public class Plotter  extends PApplet {
             }
         }
     }
+
+    // Render the current minimum path
+    public void renderPath (List<Vec2> path)
+    {
+        for (int i = 1; i < path.size(); i++){
+            fill(0,200,0);
+            line(path.get(i - 1).x, path.get(i - 1).y, path.get(i).x, path.get(i).y);
+        }
+
+    }
+
 
 }
 
