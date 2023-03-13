@@ -11,9 +11,13 @@ public class DStar
     /* An implementation of the D* star lite algorithm */
 
     public PriorityQueue<HeapNode> heap;       // The heap of next positions to visit
-    public Set<Vec2> inconsistents;            // The set of inconsistent nodes
+    public Map<Vec2, HeapNode> inconsistents;  // The set of map of inconsistent nodes (used only because
+                                               // looking for an element in a hash map is computationally faster than
+                                               // looking for it in the queue
     public float km;                           // Accumulation factor
-    public Vec2 source, goal, current;         // Starting and ending positions, and the current position where the robot is
+    public Vec2 source, goal, current, last;   // Starting and ending positions, the current position where the robot is,
+                                               // and the last position visited by the robot
+    //public int viewSize = 3;                 // How far the robot can see
 
     int[][] slam;         // The current knowledge of the environment the algorithm has
     float[][] rhs;        // The second level estimate of distance between nodes and goal
@@ -25,12 +29,22 @@ public class DStar
         this.source = source;
         this.goal = goal;
         this.current = source;
+        this.last = null;
         this.slam = slam;
         this.km = 0;
+        this.heap = new PriorityQueue<>();
+        this.inconsistents = new HashMap<>();
+
         this.rhs = new float[slam.length][slam[0].length];
         this.g = new float[slam.length][slam[0].length];
-        this.heap = new PriorityQueue<>();
-        this.inconsistents = new HashSet<>();
+
+        for (int i = 0; i < slam.length; i++)
+        {
+            Arrays.fill(g[i], Float.POSITIVE_INFINITY);
+            Arrays.fill(rhs[i], Float.POSITIVE_INFINITY);
+        }
+
+        rhs[source.x][source.y] = 0;
     }
 
 
@@ -49,7 +63,6 @@ public class DStar
     // Make a step to the goal
     public void step ()
     {
-
         // Move to the position that corresponds to the shortest path to the goal
         List<Vec2> nextNodes = getNeighbours(current);
         Vec2 nextNode = null;
@@ -67,14 +80,69 @@ public class DStar
     }
 
 
+    // Add a new obstacle to the slam
+    public void addObstacle (Vec2 position)
+    {
+        slam[position.x][position.y] = 1;
+        g[position.x][position.y] = Float.POSITIVE_INFINITY;
+        rhs[position.x][position.y] = Float.POSITIVE_INFINITY;
+        for (Vec2 pos : getNeighbours(current))
+            updateVertex(pos);
+    }
+
+
+    // Remove an obstacle from the slam
+    public void removeObstacle (Vec2 position)
+    {
+        slam[position.x][position.y] = 0;
+        updateVertex(position);
+        for (Vec2 pos : getNeighbours(current))
+            updateVertex(pos);
+    }
+
+
+    public void updateVertex(Vec2 position)
+    {
+        int x = position.x, y = position.y;
+
+        // Update the rhs value according to the neighbours
+        if (!position.equals(goal))
+        {
+            rhs[x][y] = Float.POSITIVE_INFINITY;
+            for (Vec2 n : getNeighbours(position)) {
+                float cost = (n.x == x || n.y == y) ? 1.0f : 1.414f;
+                rhs[x][y] = Math.min(rhs[x][y], g[n.x][n.y] + cost);
+            }
+        }
+
+        // Remove from the heap (it will be re-added with updated costs if inconsistent - see next lines)
+        if (inconsistents.containsKey(position))
+        {
+            HeapNode node = inconsistents.get(position);
+            inconsistents.remove(position);
+            heap.remove(node);
+        }
+
+        // Add to the heap if inconsistent
+        if (g[x][y] != rhs[x][y])
+        {
+            HeapNode node = computeHeapNode(position);
+            inconsistents.put(position, node);
+            heap.add(node);
+        }
+
+    }
+
+
     // Get the neighbours of a position
     public List<Vec2> getNeighbours (Vec2 position)
     {
-
         List<Vec2> neighbours = new ArrayList<>(8);
 
-        for (int i = position.x - 1; i < position.x + 2; i++){
-            for (int j = position.y - 1; j < position.y + 2; j++){
+        for (int i = position.x - 1; i < position.x + 2; i++)
+        {
+            for (int j = position.y - 1; j < position.y + 2; j++)
+            {
 
                 if (i == position.x && j == position.y)
                     continue;

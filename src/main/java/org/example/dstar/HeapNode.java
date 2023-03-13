@@ -3,7 +3,8 @@ package org.example.dstar;
 import org.example.Vec2;
 
 
-public class HeapNode  implements Comparable<HeapNode>{
+public class HeapNode  implements Comparable<HeapNode>
+{
 
     /* An instance of this class represent a node into the D* heap */
 
@@ -17,7 +18,8 @@ public class HeapNode  implements Comparable<HeapNode>{
     }
 
     @Override
-    public int compareTo(HeapNode other) {
+    public int compareTo(HeapNode other)
+    {
         if (this.k1 == other.k1) {
             if (this.k2 == other.k2)
                 return 0;
@@ -25,4 +27,27 @@ public class HeapNode  implements Comparable<HeapNode>{
         }
         return this.k1 < other.k1 ? -1 : 1;
     }
+
+    @Override
+    public boolean equals (Object other)
+    {
+        // !NOTE!: The check is made only on the position (not on k1 and k2)
+        // because the same node cannot stay into the heap even with different
+        // associated costs.
+
+        if (other == null || other.getClass() != this.getClass())
+            return false;
+        HeapNode otherNode = (HeapNode) other;
+        return this.position.equals(otherNode.position);
+    }
+
+    @Override
+    public int hashCode ()
+    {
+        // !NOTE!: The check is made only on the position (not on k1 and k2)
+        // because the same node cannot stay into the heap even with different
+        // associated costs.
+        return position.hashCode();
+    }
+
 }

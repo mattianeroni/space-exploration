@@ -1,20 +1,20 @@
 package org.example;
 
+import org.example.dstar.DStar;
 import org.example.dstar.HeapNode;
 import processing.core.PApplet;
 import java.io.File;
 import java.io.IOException;
-import java.util.Comparator;
-import java.util.PriorityQueue;
-import java.util.Random;
-import java.util.Scanner;
+import java.util.*;
 
 
-public class Main {
+public class Main
+{
 
 
     /* Read a new grid map */
-    public static int[][] readMap (File file, int sizeX, int sizeY) throws IOException {
+    public static int[][] readMap (File file, int sizeX, int sizeY) throws IOException
+    {
 
         int[][] grid = new int[sizeX][sizeY];
 
@@ -22,15 +22,15 @@ public class Main {
         String[] pixels = scanner.nextLine().split(",");
         int counter = 0;
 
-        for (int i = 0; i < sizeX; i++) {
-
-            for (int j = 0; j < sizeY; j++) {
+        for (int i = 0; i < sizeX; i++)
+        {
+            for (int j = 0; j < sizeY; j++)
+            {
 
                 grid[i][j] = Integer.parseInt(pixels[counter]);
                 counter++;
 
             }
-
         }
         return grid;
     }
@@ -41,19 +41,20 @@ public class Main {
         :param grid: the ROS grid map
         :param bravery: over this value elements of ROS grid map are considered obstacles
     */
-    public static int[][] makeBinaryGridMap (int[][] grid, int bravery) {
+    public static int[][] makeBinaryGridMap (int[][] grid, int bravery)
+    {
 
         int[][] Bgrid = new int[grid.length][grid[0].length];
 
-        for (int i = 0; i < grid.length; i++) {
-
-            for (int j = 0; j < grid[0].length; j++) {
+        for (int i = 0; i < grid.length; i++)
+        {
+            for (int j = 0; j < grid[0].length; j++)
+            {
 
                 if (grid[i][j] > bravery)
                     Bgrid[i][j] = 1;
 
             }
-
         }
         return Bgrid;
     }
@@ -68,24 +69,29 @@ public class Main {
     static int BRAVERY = 90;
 
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException
+    {
 
         // Create the grid map
         int[][] grid = new int[ROWS][COLS];   //readMap(new File("map.csv"), ROWS, COLS);
 
         // Translate the grid map into a binary obstacles map
-        // grid = makeBinaryGridMap(grid, BRAVERY)
+        // grid = makeBinaryGridMap(grid, BRAVERY);
 
         // Source and target points
         Vec2 source = new Vec2(0, 0);
-        Vec2 target = new Vec2(100, 100);
+        Vec2 goal = new Vec2(90, 90);
 
         // https://github.com/zhm-real/PathPlanning/blob/master/Search_based_Planning/Search_2D/D_star_Lite.py
 
+        Map<Vec2, Integer> map = new HashMap<>();
+        map.put(source, 0);
+        //map.put(goal, 1);
+        System.out.println(map.get(goal));
 
-        //Plotter plt = new Plotter(grid, 3);
+        DStar dstar = new DStar(source, goal, grid);
+        //Plotter plt = new Plotter(dstar, grid, 3);
         //PApplet.runSketch(new String[]{"ProcessingTest"}, plt);
+
     }
-
-
 }
