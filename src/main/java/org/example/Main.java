@@ -36,7 +36,7 @@ public class Main
 
 
         // Init the game
-        Plotter plt = new Plotter(dstar, grid, 100);
+        Plotter plt = new Plotter(dstar, grid, 50);
         PApplet.runSketch(new String[]{"ProcessingTest"}, plt);
 
     }

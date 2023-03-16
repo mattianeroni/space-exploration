@@ -14,7 +14,8 @@ public class Plotter  extends PApplet
     DStar dstar;                // The path finding algorithm
     int fps = 100;              // Frames per second
     int[][] grid;               // The binary grid of obstacles
-    List<Vec2> path;            // The current minimum path to visualize
+    List<Vec2> path;            // The current path to the goal found by the algorithm
+
 
     public Plotter(DStar dstar, int[][] grid, int cellSize)
     {
@@ -41,7 +42,7 @@ public class Plotter  extends PApplet
         size(cellSize * nCellsX, cellSize * nCellsY);
     }
 
-
+    /* Setup of Processing window */
     public void setup()
     {
         background(220);
@@ -54,14 +55,10 @@ public class Plotter  extends PApplet
         renderRobot();
     }
 
+    /* Empty method for a new generation at each frame */
     public void draw()
     {
-        background(220);
-        strokeWeight(1);  // Default 4
-        renderBinaryGrid();
-        renderEstimation();
-        renderPath();
-        renderRobot();
+
     }
 
 
@@ -85,24 +82,26 @@ public class Plotter  extends PApplet
                 if (grid[x][y] == 1)
                 {
                     grid[x][y] = 0;
-                    dstar.updateSlam(x, y, 0);
+                    dstar.setUpdatedSlam(x, y, 0);
                     System.out.println("[INFO] Removed obstacle at (" + x + "," + y + ")");
                 } else
                 {
                     grid[x][y] = 1;
-                    dstar.updateSlam(x, y, 1);
+                    dstar.setUpdatedSlam(x, y, 1);
                     System.out.println("[INFO] Added obstacle at (" + x + "," + y + ")");
                 }
-                System.out.println("start path");
+                dstar.updateCosts();
                 dstar.computePath();
-                System.out.println("stack path");
                 path = dstar.extractPath();
-                System.out.println("start extract");
-                for (Vec2 i : path)
-                    System.out.print(i.repr() + " - ");
-                System.out.print("\n");
             }
         }
+
+        background(220);
+        strokeWeight(1);  // Default 4
+        renderBinaryGrid();
+        renderEstimation();
+        renderPath();
+        renderRobot();
     }
 
 
@@ -130,10 +129,18 @@ public class Plotter  extends PApplet
         {
             for (int j = 0; j < grid[0].length; j++)
             {
-                textSize(5);
+                textSize(cellSize*0.3f);
+                fill(0);
                 if (dstar.g[i][j] == Float.POSITIVE_INFINITY)
-                    text( Float.POSITIVE_INFINITY, i * cellSize + (float) cellSize / 2, j * cellSize + (float) cellSize / 2);
-                text( (int) dstar.g[i][j], i * cellSize + (float) cellSize / 2, j * cellSize + (float) cellSize / 2);
+                    text( "∞", i * cellSize + (float) cellSize / 2, j * cellSize + (float) cellSize / 2);
+                else
+                    text( String.format("%.1f", dstar.g[i][j]), i * cellSize + (float) cellSize / 2, j * cellSize + (float) cellSize / 2);
+
+                fill(250,0,0);
+                if (dstar.rhs[i][j] == Float.POSITIVE_INFINITY)
+                    text( "∞", i * cellSize + (float) cellSize / 2, j * cellSize + (float) cellSize / 2);
+                else
+                    text( String.format("%.1f", dstar.rhs[i][j]), i * cellSize + (float) cellSize / 2, j * cellSize + (float) cellSize / 2);
             }
         }
     }
