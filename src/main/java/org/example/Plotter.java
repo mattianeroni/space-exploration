@@ -1,6 +1,7 @@
 package org.example;
 
 import org.example.dstar.DStar;
+import org.example.dstar.exceptions.NoPathFound;
 import processing.core.PApplet;
 
 import java.util.List;
@@ -14,7 +15,7 @@ public class Plotter  extends PApplet
     DStar dstar;                // The path finding algorithm
     int fps = 100;              // Frames per second
     int[][] grid;               // The binary grid of obstacles
-    List<Vec2> path;            // The current path to the goal found by the algorithm
+    //List<Vec2> path;            // The current path to the goal found by the algorithm
 
 
     public Plotter(DStar dstar, int[][] grid, int cellSize)
@@ -46,11 +47,15 @@ public class Plotter  extends PApplet
     public void setup()
     {
         background(220);
-        strokeWeight(1);  // Default 4
+        strokeWeight(1);        // Default 4
         dstar.computePath();
-        path = dstar.extractPath();
+        try{
+            dstar.extractPath();
+        } catch (NoPathFound e) {
+            throw new RuntimeException(e);
+        }
         renderBinaryGrid();
-        renderEstimation();
+        //renderEstimation();
         renderPath();
         renderRobot();
     }
@@ -62,14 +67,18 @@ public class Plotter  extends PApplet
     }
 
 
-    // When right button is clicked, the robot make a movement
-    // When left button is clicked an obstacle is added / removed
-    public void mousePressed ()
-    {
+    /*
+     When right button is clicked, the robot make a movement.
+     When left button is clicked an obstacle is added / removed.
+    */
+    public void mousePressed() {
         if (mouseButton == RIGHT)
         {
-            dstar.step();
-            path = dstar.extractPath();
+            try {
+                dstar.step();
+            } catch (NoPathFound e) {
+                throw new RuntimeException(e);
+            }
             System.out.println("[INFO] Step to (" + dstar.current.x + "," + dstar.current.y + ")");
         }
         else if (mouseButton == LEFT)
@@ -92,14 +101,18 @@ public class Plotter  extends PApplet
                 }
                 dstar.updateCosts();
                 dstar.computePath();
-                path = dstar.extractPath();
+                try {
+                    dstar.extractPath();
+                } catch (NoPathFound e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
 
         background(220);
         strokeWeight(1);  // Default 4
         renderBinaryGrid();
-        renderEstimation();
+        //renderEstimation();
         renderPath();
         renderRobot();
     }
@@ -141,6 +154,7 @@ public class Plotter  extends PApplet
                     text( "∞", i * cellSize + (float) cellSize / 2, j * cellSize + (float) cellSize / 2);
                 else
                     text( String.format("%.1f", dstar.rhs[i][j]), i * cellSize + (float) cellSize / 2, j * cellSize + (float) cellSize / 2);
+
             }
         }
     }
@@ -148,15 +162,17 @@ public class Plotter  extends PApplet
     // Render the current minimum path
     public void renderPath ()
     {
-        for (int i = 1; i < path.size(); i++)
+        Vec2 cNode = dstar.current;
+        for (int i = 0; i < dstar.path.size(); i++)
         {
             stroke(0, 150, 0);
             strokeWeight(4);  // Default 4
-            float startx = path.get(i - 1).x * cellSize + (float) cellSize / 2;
-            float starty = path.get(i - 1).y * cellSize + (float) cellSize / 2;
-            float endx = path.get(i).x * cellSize + (float) cellSize / 2;
-            float endy = path.get(i).y * cellSize + (float) cellSize / 2;
+            float startx = cNode.x * cellSize + (float) cellSize / 2;
+            float starty = cNode.y * cellSize + (float) cellSize / 2;
+            float endx = dstar.path.get(i).x * cellSize + (float) cellSize / 2;
+            float endy = dstar.path.get(i).y * cellSize + (float) cellSize / 2;
             line(startx, starty, endx, endy);
+            cNode = dstar.path.get(i);
         }
     }
 

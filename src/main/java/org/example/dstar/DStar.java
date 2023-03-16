@@ -1,6 +1,7 @@
 package org.example.dstar;
 
 import org.example.Vec2;
+import org.example.dstar.exceptions.NoPathFound;
 
 import java.util.*;
 
@@ -19,11 +20,13 @@ public class DStar
                                                // and the last position visited by the robot
     public boolean changed = false;            // A flag that says if new obstacles have been found
     public Set<Vec2> covered;                  // The set of positions covered by the robot
+    public LinkedList<Vec2> path;              // The current minimum path to the goal
 
     public int[][] slam;                       // The current knowledge of the environment the algorithm has
     public int[][] updatedSlam;                // A more updated version of the slam with new obstacles or spaces
     public float[][] rhs;                      // The second level estimate of distance between nodes and goal
     public float[][] g;                        // The matrices of distances between nodes and goal
+
 
     public DStar (Vec2 source, Vec2 goal, int[][] slam)
     {
@@ -38,6 +41,7 @@ public class DStar
         this.heap = new PriorityQueue<>();
         this.inconsistents = new HashMap<>();
         this.covered = new HashSet<>();
+        this.path = new LinkedList<>();
 
         // Init matrices for distances estimation and SLAM update
         this.rhs = new float[slam.length][slam[0].length];
@@ -67,11 +71,11 @@ public class DStar
             return 0.0f;
 
         // Move into obstacle or from obstacle
-        if (slam[p1.x][p1.y] == 1 || slam[p2.x][p2.y] == 1 )
+        if ( slam[p1.x][p1.y] == 1 || slam[p2.x][p2.y] == 1 )
             return Float.POSITIVE_INFINITY;
 
         // Vertical or horizontal movement
-        if (p1.x == p2.x || p1.y == p2.y)
+        if ( p1.x == p2.x || p1.y == p2.y )
             return 1.0f;
 
         // Diagonal movement
@@ -84,7 +88,7 @@ public class DStar
     {
         int x = position.x, y = position.y;
         return new HeapNode(
-                Math.min(g[x][y], rhs[x][y]) + km + euclidean(source, position),
+                Math.min(g[x][y], rhs[x][y]) + km + euclidean(current, position),
                 Math.min(g[x][y], rhs[x][y]),
                 position
         );
@@ -92,37 +96,18 @@ public class DStar
 
 
     // Make a step to the goal
-    public void step ()
+    public void step () throws NoPathFound
     {
         // Arrived
         if (current.equals(goal))
             return;
 
-
-        // No path to goal found
-        if (rhs[current.x][current.y] == Float.POSITIVE_INFINITY)
+        /*if (rhs[current.x][current.y] == Float.POSITIVE_INFINITY)
         {
             System.out.println("[WARNING] No known path to goal.");
             return;
-        }
-
-
-        // Move to the next position
-        Vec2 nextNode = null;
-        float minCost = Float.POSITIVE_INFINITY;
-        for (Vec2 node : getNeighbours(current))
-        {
-            float cost = moveCost(current, node, slam) + g[node.x][node.y];
-            if (cost <= minCost)
-            {
-                minCost = cost;
-                nextNode = node;
-            }
-        }
-        if (current == null)
-            System.out.println("[WARNING] No possible next step.");
-
-        current = nextNode;
+        }*/
+        current = path.removeFirst();
         covered.add(current);
     }
 
@@ -166,7 +151,8 @@ public class DStar
         @param y: The y-coordinate
         @param value: The new value (i.e., 1 if a new obstacle is detected, 0 if new passage is detected)
     */
-    public void setUpdatedSlam (int x, int y, int value) {
+    public void setUpdatedSlam (int x, int y, int value)
+    {
         changed = true;
         updatedSlam[x][y] = value;
     }
@@ -227,20 +213,21 @@ public class DStar
                             rhs[u.x][u.y] = Math.min(rhs[u.x][u.y], moveCost(u, succ, updatedSlam) + g[succ.x][succ.y]);
                     }
                     updateVertex(u);
-
                 }
+                // Update the slam position
+                slam[x][y] = updatedSlam[x][y];
             }
         }
-        // Update slam
-        slam = Arrays.stream(updatedSlam).map(int[]::clone).toArray(int[][]::new);
+
     }
 
 
-    // Compute the shortest path to the goal according to the current knowledge of the environment
+    /*
+      Compute the shortest path to the goal according to the current knowledge of the environment.
+      The computation is made using a backward process from the goal to the current robot position.
+    */
     public void computePath()
     {
-
-
         while (
                 heap.peek() != null &&
                 (heap.peek().compareTo(computeHeapNode(current)) < 0  ||
@@ -286,15 +273,15 @@ public class DStar
                 }
             }
         }
-
     }
 
 
-    public List<Vec2> extractPath()
+    /* Extract the currently possible path to the destination */
+    public void extractPath() throws NoPathFound
     {
-        List<Vec2> path = new ArrayList<>();
+        LinkedList<Vec2> path = new LinkedList<>();
         Set<Vec2> visited = new HashSet<>();
-        path.add(current);
+        //path.add(current);
         visited.add(current);
         Vec2 cNode = current;
 
@@ -309,25 +296,23 @@ public class DStar
                 {
                     minCost = cost;
                     minNode = next;
-
                 }
             }
-            if (cNode == null)
-                System.out.println("[WARNING] No possible next step.");
+            if (minNode == null)
+                throw new NoPathFound("[ERROR] No known path to goal.");
+
             path.add(minNode);
             visited.add(minNode);
             cNode = minNode;
         }
-
-        return path;
-
+        this.path = path;
     }
 
 
 
     /*
-    Get the neighbours of a position by excluding the obstacles.
-    NOTE: The positions occupied by obstacles are not returned.
+      Get the neighbours of a position by excluding the obstacles.
+      NOTE: The positions occupied by obstacles are not returned.
     */
     public List<Vec2> getNeighbours (Vec2 position)
     {
@@ -350,12 +335,11 @@ public class DStar
 
             }
         }
-
         return neighbours;
     }
 
 
-    // The euclidean distance between two positions
+    /* The euclidean distance between two positions */
     public static float euclidean (Vec2 v1, Vec2 v2)
     {
         return (float) Math.sqrt(Math.pow(v1.x - v2.x, 2) + Math.pow(v1.y - v2.y, 2));

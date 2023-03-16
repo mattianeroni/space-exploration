@@ -31,6 +31,16 @@ public class Main
         Vec2 source = new Vec2(0, 0);
         Vec2 goal = new Vec2(9, 9);
 
+        /*Random randGen = new Random();
+        for (int i = 0; i < slam.length; i++){
+            for (int j = 0; j < slam[0].length; j++){
+                if (randGen.nextFloat() < 0.2f) {
+                    slam[i][j] = 1;
+                    grid[i][j] = 1;
+                }
+            }
+        }*/
+
         // Init the path finding algorithm
         DStar dstar = new DStar(source, goal, slam);
 
