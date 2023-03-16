@@ -10,81 +10,33 @@ import java.util.*;
 
 public class Main
 {
-
-
-    /* Read a new grid map */
-    public static int[][] readMap (File file, int sizeX, int sizeY) throws IOException
-    {
-
-        int[][] grid = new int[sizeX][sizeY];
-
-        Scanner scanner = new Scanner(file);
-        String[] pixels = scanner.nextLine().split(",");
-        int counter = 0;
-
-        for (int i = 0; i < sizeX; i++)
-        {
-            for (int j = 0; j < sizeY; j++)
-            {
-
-                grid[i][j] = Integer.parseInt(pixels[counter]);
-                counter++;
-
-            }
-        }
-        return grid;
-    }
-
-
-    /*
-        Convert ROS grid map to obstacles binary grid map
-        :param grid: the ROS grid map
-        :param bravery: over this value elements of ROS grid map are considered obstacles
-    */
-    public static int[][] makeBinaryGridMap (int[][] grid, int bravery)
-    {
-
-        int[][] Bgrid = new int[grid.length][grid[0].length];
-
-        for (int i = 0; i < grid.length; i++)
-        {
-            for (int j = 0; j < grid[0].length; j++)
-            {
-
-                if (grid[i][j] > bravery)
-                    Bgrid[i][j] = 1;
-
-            }
-        }
-        return Bgrid;
-    }
-
-
     // The size of the grid map
-    static int ROWS = 100;
-    static int COLS = 100;
-
-    // The bravery. Over this value of accuracy, elements in ROS map
-    // are considered obstacles.
-    static int BRAVERY = 90;
+    static int ROWS = 10;
+    static int COLS = 10;
 
 
-    public static void main(String[] args) throws IOException
+    public static void main(String[] args)
     {
 
         // Create the grid map
-        int[][] grid = new int[ROWS][COLS];   //readMap(new File("map.csv"), ROWS, COLS);
+        int[][] grid = new int[ROWS][COLS];
+
+        // Create the SLAM (i.e., a partially blind view of the grid)
+        int[][] slam = new int[ROWS][COLS];
 
         // Translate the grid map into a binary obstacles map
         // grid = makeBinaryGridMap(grid, BRAVERY);
 
         // Source and target points
         Vec2 source = new Vec2(0, 0);
-        Vec2 goal = new Vec2(90, 90);
+        Vec2 goal = new Vec2(9, 9);
+
+        // Init the path finding algorithm
+        DStar dstar = new DStar(source, goal, slam);
 
 
-        DStar dstar = new DStar(source, goal, grid);
-        Plotter plt = new Plotter(dstar, grid, 5);
+        // Init the game
+        Plotter plt = new Plotter(dstar, grid, 100);
         PApplet.runSketch(new String[]{"ProcessingTest"}, plt);
 
     }

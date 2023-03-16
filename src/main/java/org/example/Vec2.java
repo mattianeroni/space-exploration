@@ -35,4 +35,16 @@ public class Vec2
         return Objects.hash(x, y);
     }
 
+
+    public String repr()
+    {
+        return "(" + x + ", " + y + ")";
+    }
+
+
+    public Vec2 copy()
+    {
+        return new Vec2(x, y);
+    }
+
 }

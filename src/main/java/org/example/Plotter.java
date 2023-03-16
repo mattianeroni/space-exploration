@@ -14,6 +14,7 @@ public class Plotter  extends PApplet
     DStar dstar;                // The path finding algorithm
     int fps = 100;              // Frames per second
     int[][] grid;               // The binary grid of obstacles
+    List<Vec2> path;            // The current minimum path to visualize
 
     public Plotter(DStar dstar, int[][] grid, int cellSize)
     {
@@ -45,23 +46,22 @@ public class Plotter  extends PApplet
     {
         background(220);
         strokeWeight(1);  // Default 4
-        dstar.step();
         dstar.computePath();
-        List<Vec2> path = dstar.extractPath();
+        path = dstar.extractPath();
         renderBinaryGrid();
-        renderPath(path);
+        renderEstimation();
+        renderPath();
+        renderRobot();
     }
 
     public void draw()
     {
         background(220);
         strokeWeight(1);  // Default 4
-        dstar.step();
-        dstar.computePath();
-        List<Vec2> path = dstar.extractPath();
         renderBinaryGrid();
-        renderPath(path);
-
+        renderEstimation();
+        renderPath();
+        renderRobot();
     }
 
 
@@ -72,23 +72,35 @@ public class Plotter  extends PApplet
         if (mouseButton == RIGHT)
         {
             dstar.step();
+            path = dstar.extractPath();
             System.out.println("[INFO] Step to (" + dstar.current.x + "," + dstar.current.y + ")");
         }
         else if (mouseButton == LEFT)
         {
             if (mouseX >= 0 && mouseX < cellSize * nCellsX &&
-                    mouseY >= 0 && mouseY < cellSize * nCellsY) {
+                    mouseY >= 0 && mouseY < cellSize * nCellsY)
+            {
                 int x = mouseX / cellSize;
                 int y = mouseY / cellSize;
-                if (grid[x][y] == 1) {
+                if (grid[x][y] == 1)
+                {
                     grid[x][y] = 0;
-                    dstar.removeObstacle(new Vec2(x,y));
+                    dstar.updateSlam(x, y, 0);
                     System.out.println("[INFO] Removed obstacle at (" + x + "," + y + ")");
-                } else {
+                } else
+                {
                     grid[x][y] = 1;
-                    dstar.addObstacle(new Vec2(x,y));
+                    dstar.updateSlam(x, y, 1);
                     System.out.println("[INFO] Added obstacle at (" + x + "," + y + ")");
                 }
+                System.out.println("start path");
+                dstar.computePath();
+                System.out.println("stack path");
+                path = dstar.extractPath();
+                System.out.println("start extract");
+                for (Vec2 i : path)
+                    System.out.print(i.repr() + " - ");
+                System.out.print("\n");
             }
         }
     }
@@ -97,26 +109,57 @@ public class Plotter  extends PApplet
     // Render the binary obstacles map
     public void renderBinaryGrid()
     {
-        for (int i = 0; i < grid.length ; i++){
-            for (int j = 0; j < grid[0].length; j++){
-                if (grid[i][j] == 1){
+        for (int i = 0; i < grid.length ; i++)
+        {
+            for (int j = 0; j < grid[0].length; j++)
+            {
+                if (grid[i][j] == 1)
+                {
                     fill(120);
+                    stroke(120);
                     rect(i * cellSize, j * cellSize, cellSize, cellSize);
                 }
             }
         }
     }
 
-    // Render the current minimum path
-    public void renderPath (List<Vec2> path)
-    {
-        for (int i = 1; i < path.size(); i++){
-            fill(0,200,0);
-            line(path.get(i - 1).x, path.get(i - 1).y, path.get(i).x, path.get(i).y);
-        }
 
+    public void renderEstimation ()
+    {
+        for (int i = 0; i < grid.length ; i++)
+        {
+            for (int j = 0; j < grid[0].length; j++)
+            {
+                textSize(5);
+                if (dstar.g[i][j] == Float.POSITIVE_INFINITY)
+                    text( Float.POSITIVE_INFINITY, i * cellSize + (float) cellSize / 2, j * cellSize + (float) cellSize / 2);
+                text( (int) dstar.g[i][j], i * cellSize + (float) cellSize / 2, j * cellSize + (float) cellSize / 2);
+            }
+        }
     }
 
+    // Render the current minimum path
+    public void renderPath ()
+    {
+        for (int i = 1; i < path.size(); i++)
+        {
+            stroke(0, 150, 0);
+            strokeWeight(4);  // Default 4
+            float startx = path.get(i - 1).x * cellSize + (float) cellSize / 2;
+            float starty = path.get(i - 1).y * cellSize + (float) cellSize / 2;
+            float endx = path.get(i).x * cellSize + (float) cellSize / 2;
+            float endy = path.get(i).y * cellSize + (float) cellSize / 2;
+            line(startx, starty, endx, endy);
+        }
+    }
+
+    // Render the robot on the grid map
+    public void renderRobot ()
+    {
+        stroke(100, 0, 0);
+        fill(100, 0, 0);
+        ellipse(dstar.current.x * cellSize + (float) cellSize / 2, dstar.current.y* cellSize + (float) cellSize / 2, (float) cellSize / 3, (float) cellSize/3);
+    }
 
 }
 

@@ -50,4 +50,9 @@ public class HeapNode  implements Comparable<HeapNode>
         return position.hashCode();
     }
 
+    public String repr ()
+    {
+        return "HeapNode(" + k1 + ", " + k2 + ", " + position.repr() + ")";
+    }
+
 }
