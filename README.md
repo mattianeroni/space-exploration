@@ -1,8 +1,9 @@
 # Space Exploration
 Implementation of several algorithms for space and unknown terrain exploration.
 
-### Agenda
-[D* Lite] D* Lite 
+### Table of Contents
+[D* Lite](#dlite) 
 
+<a name="dlite"/>
 ### D* Lite
 
