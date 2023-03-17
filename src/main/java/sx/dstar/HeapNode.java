@@ -1,6 +1,6 @@
-package org.example.dstar;
+package sx.dstar;
 
-import org.example.Vec2;
+import sx.Vec2;
 
 
 public class HeapNode  implements Comparable<HeapNode>

@@ -1,10 +1,12 @@
-package org.example;
+package sx;
 
-import org.example.dstar.DStar;
-import org.example.dstar.exceptions.NoPathFound;
+import sx.dstar.DStar;
+import sx.dstar.exceptions.NoPathFound;
 import processing.core.PApplet;
 
-import java.util.List;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 
 public class Plotter  extends PApplet
@@ -15,7 +17,7 @@ public class Plotter  extends PApplet
     DStar dstar;                // The path finding algorithm
     int fps = 100;              // Frames per second
     int[][] grid;               // The binary grid of obstacles
-    //List<Vec2> path;            // The current path to the goal found by the algorithm
+    DateFormat time;            // The timeprint format
 
 
     public Plotter(DStar dstar, int[][] grid, int cellSize)
@@ -25,6 +27,7 @@ public class Plotter  extends PApplet
         this.nCellsX = grid.length;
         this.nCellsY = grid[0].length;
         this.grid = grid;
+        this.time = new SimpleDateFormat("HH:mm:ss.SSS");
     }
 
     public Plotter(DStar dstar, int[][] grid, int cellSize, int fps)
@@ -35,6 +38,7 @@ public class Plotter  extends PApplet
         this.nCellsY = grid[0].length;
         this.fps = fps;
         this.grid = grid;
+        this.time = new SimpleDateFormat("HH:mm:ss.SSS");
     }
 
 
@@ -48,14 +52,14 @@ public class Plotter  extends PApplet
     {
         background(220);
         strokeWeight(1);        // Default 4
-        dstar.computePath();
+        dstar.computePath(false);
         try{
             dstar.extractPath();
         } catch (NoPathFound e) {
             throw new RuntimeException(e);
         }
         renderBinaryGrid();
-        //renderEstimation();
+        renderEstimation();
         renderPath();
         renderRobot();
     }
@@ -74,12 +78,8 @@ public class Plotter  extends PApplet
     public void mousePressed() {
         if (mouseButton == RIGHT)
         {
-            try {
-                dstar.step();
-            } catch (NoPathFound e) {
-                throw new RuntimeException(e);
-            }
-            System.out.println("[INFO] Step to (" + dstar.current.x + "," + dstar.current.y + ")");
+            dstar.step();
+            System.out.println("[" + time.format(new Date()) + "][INFO] Step to (" + dstar.current.x + "," + dstar.current.y + ")");
         }
         else if (mouseButton == LEFT)
         {
@@ -91,20 +91,28 @@ public class Plotter  extends PApplet
                 if (grid[x][y] == 1)
                 {
                     grid[x][y] = 0;
-                    dstar.setUpdatedSlam(x, y, 0);
-                    System.out.println("[INFO] Removed obstacle at (" + x + "," + y + ")");
+                    dstar.updateSlam(new Vec2(x, y), 0);
+                    System.out.println("[" + time.format(new Date()) + "][INFO] Removed obstacle at (" + x + "," + y + ")");
                 } else
                 {
                     grid[x][y] = 1;
-                    dstar.setUpdatedSlam(x, y, 1);
-                    System.out.println("[INFO] Added obstacle at (" + x + "," + y + ")");
+                    dstar.updateSlam(new Vec2(x, y), 1);
+                    System.out.println("[" + time.format(new Date()) + "][INFO] Added obstacle at (" + x + "," + y + ")");
                 }
-                dstar.updateCosts();
-                dstar.computePath();
+
+                dstar.computePath(false);
                 try {
                     dstar.extractPath();
+                    System.out.println("[" + time.format(new Date()) + "][INFO] New path found");
                 } catch (NoPathFound e) {
-                    throw new RuntimeException(e);
+                    dstar.reset(); // = new DStar(dstar.current, dstar.goal, dstar.slam);
+                    dstar.computePath(false);
+                    try {
+                        dstar.extractPath();
+                        System.out.println("[" + time.format(new Date()) + "][INFO] New path found after re-computation");
+                    } catch (NoPathFound ex){
+                        throw new RuntimeException(ex);
+                    }
                 }
             }
         }
@@ -112,7 +120,7 @@ public class Plotter  extends PApplet
         background(220);
         strokeWeight(1);  // Default 4
         renderBinaryGrid();
-        //renderEstimation();
+        renderEstimation();
         renderPath();
         renderRobot();
     }
@@ -142,14 +150,14 @@ public class Plotter  extends PApplet
         {
             for (int j = 0; j < grid[0].length; j++)
             {
-                textSize(cellSize*0.3f);
+                textSize(cellSize * 0.2f);
                 fill(0);
-                if (dstar.g[i][j] == Float.POSITIVE_INFINITY)
+                /*if (dstar.g[i][j] == Float.POSITIVE_INFINITY)
                     text( "∞", i * cellSize + (float) cellSize / 2, j * cellSize + (float) cellSize / 2);
                 else
                     text( String.format("%.1f", dstar.g[i][j]), i * cellSize + (float) cellSize / 2, j * cellSize + (float) cellSize / 2);
 
-                fill(250,0,0);
+                fill(250,0,0);*/
                 if (dstar.rhs[i][j] == Float.POSITIVE_INFINITY)
                     text( "∞", i * cellSize + (float) cellSize / 2, j * cellSize + (float) cellSize / 2);
                 else

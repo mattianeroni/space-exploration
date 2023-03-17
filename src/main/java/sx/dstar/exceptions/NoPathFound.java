@@ -1,4 +1,4 @@
-package org.example.dstar.exceptions;
+package sx.dstar.exceptions;
 
 public class NoPathFound extends Exception
 {

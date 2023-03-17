@@ -1,7 +1,7 @@
-package org.example.dstar;
+package sx.dstar;
 
-import org.example.Vec2;
-import org.example.dstar.exceptions.NoPathFound;
+import sx.Vec2;
+import sx.dstar.exceptions.NoPathFound;
 
 import java.util.*;
 
@@ -23,7 +23,6 @@ public class DStar
     public LinkedList<Vec2> path;              // The current minimum path to the goal
 
     public int[][] slam;                       // The current knowledge of the environment the algorithm has
-    public int[][] updatedSlam;                // A more updated version of the slam with new obstacles or spaces
     public float[][] rhs;                      // The second level estimate of distance between nodes and goal
     public float[][] g;                        // The matrices of distances between nodes and goal
 
@@ -46,12 +45,10 @@ public class DStar
         // Init matrices for distances estimation and SLAM update
         this.rhs = new float[slam.length][slam[0].length];
         this.g = new float[slam.length][slam[0].length];
-        this.updatedSlam = new int[slam.length][slam[0].length];
         for (int i = 0; i < slam.length; i++)
         {
             Arrays.fill(g[i], Float.POSITIVE_INFINITY);
             Arrays.fill(rhs[i], Float.POSITIVE_INFINITY);
-            System.arraycopy( slam[i], 0, updatedSlam[i], 0, slam[i].length );
         }
 
         // Init heap and matrices
@@ -63,8 +60,33 @@ public class DStar
     }
 
 
+    public void reset()
+    {
+        // this.km = 0.0f;      // !I don't know if needed!
+
+        this.heap = new PriorityQueue<>();
+        this.inconsistents = new HashMap<>();
+        this.path = new LinkedList<>();
+
+        // Init matrices for distances estimation and SLAM update
+        this.rhs = new float[slam.length][slam[0].length];
+        this.g = new float[slam.length][slam[0].length];
+        for (int i = 0; i < slam.length; i++)
+        {
+            Arrays.fill(g[i], Float.POSITIVE_INFINITY);
+            Arrays.fill(rhs[i], Float.POSITIVE_INFINITY);
+        }
+
+        // Init heap and matrices
+        rhs[goal.x][goal.y] = 0.0f;
+        HeapNode hn = computeHeapNode(goal);
+        inconsistents.put(goal, hn);
+        heap.add(hn);
+    }
+
+
     // The cost of moving from a position to a close position
-    public static float moveCost(Vec2 p1, Vec2 p2, int[][] slam)
+    public float moveCost(Vec2 p1, Vec2 p2)
     {
         // Same position
         if (p1.equals(p2))
@@ -96,7 +118,7 @@ public class DStar
 
 
     // Make a step to the goal
-    public void step () throws NoPathFound
+    public void step ()
     {
         // Arrived
         if (current.equals(goal))
@@ -144,95 +166,91 @@ public class DStar
     }
 
 
-    /*
-       Suggested function to update the updatedSlam (i.e., a new vision of the
-       environment the algorithm is not considering yet).
-        @param x: The x-coordinate
-        @param y: The y-coordinate
-        @param value: The new value (i.e., 1 if a new obstacle is detected, 0 if new passage is detected)
-    */
-    public void setUpdatedSlam (int x, int y, int value)
+
+    public void updateSlam (Vec2 position, int value)
     {
-        changed = true;
-        updatedSlam[x][y] = value;
+        // No changes detected
+        if (slam[position.x][position.y] == value)
+            return;
+
+        // Update the accumulation factor if robot already moved
+        km += euclidean(last, current);
+        last = current;
+
+        // Pick position coordinates
+        int x = position.x, y = position.y;
+
+        // Store the old value of the cell
+        int old_value = value == 1 ? 0 : 1;
+
+        // Iterate the cell's neighbours
+        for (Vec2 neighbour : getNeighbours(position))
+        {
+            // Update neighbours from changed cell to neighbours
+            Vec2 u = position, v = neighbour;
+            slam[x][y] = old_value;
+            float c_old = moveCost(u, v);        // Old cost before updating the SLAM
+            slam[x][y] = value;
+            float c_new = moveCost(u, v);        // New cost after updating the SLAM
+
+            if (c_old > c_new && !u.equals(goal))
+            {
+                rhs[u.x][u.y] = Math.min(rhs[u.x][u.y], c_new + g[v.x][v.y]);
+            }
+            else if (rhs[u.x][u.y] == c_old + g[v.x][v.y] && !u.equals(goal))
+            {
+                rhs[u.x][u.y] = Float.POSITIVE_INFINITY;
+                for (Vec2 succ : getNeighbours(u))
+                    rhs[u.x][u.y] = Math.min(rhs[u.x][u.y], moveCost(u, succ) + g[succ.x][succ.y]);
+            }
+            updateVertex(u);
+
+            // Update edges from neighbours to changed cell
+            u = neighbour; v = position;
+            slam[x][y] = old_value;
+            c_old = moveCost(u, v);          // Old cost before updating the SLAM
+            slam[x][y] = value;
+            c_new = moveCost(u, v);          // New cost after updating the SLAM
+
+            if (c_old > c_new && !u.equals(goal))
+            {
+                rhs[u.x][u.y] = Math.min(rhs[u.x][u.y], c_new + g[v.x][v.y]);
+            }
+            else if (rhs[u.x][u.y] == c_old + g[v.x][v.y] && !u.equals(goal))
+            {
+                rhs[u.x][u.y] = Float.POSITIVE_INFINITY;
+                for (Vec2 succ : getNeighbours(u))
+                    rhs[u.x][u.y] = Math.min(rhs[u.x][u.y], moveCost(u, succ) + g[succ.x][succ.y]);
+            }
+            updateVertex(u);
+        }
     }
 
 
-    public void updateCosts()
+
+    /*
+      The stopping condition of the path computation in case of full exploration (fullExploration == true)
+      or optimized exploration (fullExploration == false).
+    */
+    private boolean computePathStopCondition (boolean fullExploration)
     {
-        // If no changed detected there is no need to update g and rhs values
-        if (!changed)
-            return;
-
-        changed = false;
-        km += moveCost(last, current, updatedSlam);
-        last = current;
-
-        for (int x = 0; x < slam.length; x++)
-        {
-            for (int y = 0; y < slam[0].length; y++)
-            {
-                // No change detected in current cell
-                if (slam[x][y] == updatedSlam[x][y])
-                    continue;
-
-                Vec2 changedNode = new Vec2(x, y);
-
-                // Iterate the cell's neighbours
-                for (Vec2 neighbour : getNeighbours(changedNode))
-                {
-                    // Update neighbours from changed cell to neighbours
-                    Vec2 u = changedNode, v = neighbour;
-                    float c_old = moveCost(u, v, slam);
-                    float c_new = moveCost(u, v, updatedSlam);
-
-                    if (c_old > c_new && !u.equals(goal))
-                    {
-                        rhs[u.x][u.y] = Math.min(rhs[u.x][u.y], c_new + g[v.x][v.y]);
-                    }
-                    else if (rhs[u.x][u.y] == c_old + g[v.x][v.y] && !u.equals(goal))
-                    {
-                        rhs[u.x][u.y] = Float.POSITIVE_INFINITY;
-                        for (Vec2 succ : getNeighbours(u))
-                            rhs[u.x][u.y] = Math.min(rhs[u.x][u.y], moveCost(u, succ, updatedSlam) + g[succ.x][succ.y]);
-                    }
-                    updateVertex(u);
-
-                    // Update edges from neighbours to changed cell
-                    u = neighbour; v = changedNode;
-                    c_old = moveCost(u, v, slam);
-                    c_new = moveCost(u, v, updatedSlam);
-                    if (c_old > c_new && !u.equals(goal))
-                    {
-                        rhs[u.x][u.y] = Math.min(rhs[u.x][u.y], c_new + g[v.x][v.y]);
-                    }
-                    else if (rhs[u.x][u.y] == c_old + g[v.x][v.y] && !u.equals(goal))
-                    {
-                        rhs[u.x][u.y] = Float.POSITIVE_INFINITY;
-                        for (Vec2 succ : getNeighbours(u))
-                            rhs[u.x][u.y] = Math.min(rhs[u.x][u.y], moveCost(u, succ, updatedSlam) + g[succ.x][succ.y]);
-                    }
-                    updateVertex(u);
-                }
-                // Update the slam position
-                slam[x][y] = updatedSlam[x][y];
-            }
-        }
-
+        if (fullExploration == false)
+            return heap.peek() != null &&
+                    (heap.peek().compareTo(computeHeapNode(current)) < 0  ||
+                    rhs[current.x][current.y] > g[current.x][current.y]);
+        return heap.peek() != null;
     }
 
 
     /*
       Compute the shortest path to the goal according to the current knowledge of the environment.
       The computation is made using a backward process from the goal to the current robot position.
+
+      @param fullExploration: If true an enlarged search is made, otherwise an optimised search is computed.
     */
-    public void computePath()
+    public void computePath(boolean fullExploration)
     {
-        while (
-                heap.peek() != null &&
-                (heap.peek().compareTo(computeHeapNode(current)) < 0  ||
-                rhs[current.x][current.y] > g[current.x][current.y])
-        )
+        while (computePathStopCondition(fullExploration))
         {
             HeapNode node = heap.poll();
             Vec2 position = node.position;
@@ -251,7 +269,7 @@ public class DStar
                 inconsistents.remove(position);
                 for (Vec2 s : getNeighbours(position)) {
                     if (!s.equals(goal))
-                        rhs[s.x][s.y] = Math.min( rhs[s.x][s.y], moveCost(s, position, slam) + g[position.x][position.y] );
+                        rhs[s.x][s.y] = Math.min( rhs[s.x][s.y], moveCost(s, position) + g[position.x][position.y] );
                     updateVertex(s);
                 }
 
@@ -263,11 +281,11 @@ public class DStar
                 pred.add(position);
                 for (Vec2 s : pred)
                 {
-                    if (rhs[s.x][s.y] == moveCost(s, position, slam) + g_old && !s.equals(goal))
+                    if (rhs[s.x][s.y] == moveCost(s, position) + g_old && !s.equals(goal))
                     {
                         rhs[s.x][s.y] = Float.POSITIVE_INFINITY;
                         for (Vec2 succ : getNeighbours(s))
-                            rhs[s.x][s.y] = Math.min(rhs[s.x][s.y], moveCost(s, succ, slam) + g[succ.x][succ.y]);
+                            rhs[s.x][s.y] = Math.min(rhs[s.x][s.y], moveCost(s, succ) + g[succ.x][succ.y]);
                     }
                     updateVertex(s);
                 }
@@ -289,17 +307,30 @@ public class DStar
         {
             Vec2 minNode = null;
             float minCost = Float.POSITIVE_INFINITY;
+            float minT = Float.POSITIVE_INFINITY;
+
             for (Vec2 next : getNeighbours(cNode))
             {
-                float cost = g[next.x][next.y] + moveCost(cNode, next, slam);
-                if (cost <= minCost && !visited.contains(next))
-                {
+
+                float cost = g[next.x][next.y] + moveCost(cNode, next);
+                float air_cost = euclidean(next, goal) + moveCost(cNode, next);
+
+                if (cost < minCost && !visited.contains(next)) {
                     minCost = cost;
                     minNode = next;
+                    minT = air_cost;
+                } else if (cost == minCost && !visited.contains(next)) {
+                    if (air_cost < minT) {
+                        minCost = cost;
+                        minNode = next;
+                        minT = air_cost;
+                    }
                 }
+
             }
+
             if (minNode == null)
-                throw new NoPathFound("[ERROR] No known path to goal.");
+                throw new NoPathFound("[ERROR] No path found");
 
             path.add(minNode);
             visited.add(minNode);
@@ -342,6 +373,8 @@ public class DStar
     /* The euclidean distance between two positions */
     public static float euclidean (Vec2 v1, Vec2 v2)
     {
+        if (v1.equals(v2))
+            return 0.0f;
         return (float) Math.sqrt(Math.pow(v1.x - v2.x, 2) + Math.pow(v1.y - v2.y, 2));
     }
 
