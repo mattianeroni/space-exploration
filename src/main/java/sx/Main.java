@@ -1,13 +1,15 @@
 package sx;
 
-import sx.dstar.DStar;
+import sx.pathfind.DStar;
 import processing.core.PApplet;
+import sx.pathfind.PathFinderTester;
 
 
 public class Main
 {
+
     // The size of the grid map
-    static int ROWS = 10;
+    static int ROWS = 20;
     static int COLS = 10;
 
 
@@ -25,17 +27,16 @@ public class Main
 
         // Source and target points
         Vec2 source = new Vec2(0, 0);
-        Vec2 goal = new Vec2(9, 9);
+        Vec2 goal = new Vec2(19, 9);
 
 
-
+        // Test D* Lite algorithm
         // Init the path finding algorithm
-        DStar dstar = new DStar(source, goal, slam);
-
-
+        //DStar dstar = new DStar(source, goal, slam);
         // Init the game
-        Plotter plt = new Plotter(dstar, grid, 50);
-        PApplet.runSketch(new String[]{"ProcessingTest"}, plt);
+        //PathFinderTester tester = new PathFinderTester(dstar, grid, 50);
+        //PApplet.runSketch(new String[]{"ProcessingTest"}, tester);
+
 
     }
 }
