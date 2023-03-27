@@ -152,7 +152,8 @@ public class DStar implements PathFinder
             return;
         }
         */
-        current = path.removeFirst();
+        path.removeFirst();
+        current = path.getFirst();
         covered.add(current);
     }
 
@@ -359,16 +360,13 @@ public class DStar implements PathFinder
 
 
 
-    /*
-      Extract the currently possible path to the destination
-      NOTE: The path does not contain the current position but starts from the next.
-    */
+    /*  Extract the currently possible path to the destination  */
     @Override
     public void extractPath() throws NoPathFound
     {
         LinkedList<Vec2> path = new LinkedList<>();
         Set<Vec2> visited = new HashSet<>();
-        //path.add(current);
+        path.add(current);
         visited.add(current);
         Vec2 cNode = current;
 
@@ -399,7 +397,7 @@ public class DStar implements PathFinder
             }
 
             if (minNode == null)
-                throw new NoPathFound("[ERROR] No path found");
+                throw new NoPathFound("[" + time.format(new Date()) + "][ERROR] No path found");
 
             path.add(minNode);
             visited.add(minNode);

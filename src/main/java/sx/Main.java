@@ -1,10 +1,7 @@
 package sx;
 
-import sx.pathfind.AStar;
-import sx.pathfind.AStarHeapNode;
-import sx.pathfind.DStar;
+import sx.pathfind.*;
 import processing.core.PApplet;
-import sx.pathfind.PathFinderTester;
 
 import java.util.PriorityQueue;
 
@@ -40,6 +37,14 @@ public class Main
         // Init the game
         //PathFinderTester tester = new PathFinderTester(dstar, grid, 50);
         //PApplet.runSketch(new String[]{"ProcessingTest"}, tester);
+
+
+        // Test A* algorithm
+        // Init the path finding algorithm
+        AStar astar = new AStar(source, goal, slam);
+        // Init the game
+        PathFinderTester tester = new PathFinderTester(astar, grid, 50);
+        PApplet.runSketch(new String[]{"ProcessingTest"}, tester);
 
 
     }

@@ -142,7 +142,7 @@ public class PathFinderTester  extends PApplet
     {
         Vec2 cNode = pathFinder.getCurrent();
         LinkedList<Vec2> path = pathFinder.getPath();
-        for (int i = 0; i < pathFinder.getPath().size(); i++)
+        for (int i = 1; i < pathFinder.getPath().size(); i++)
         {
             stroke(0, 150, 0);
             strokeWeight(4);  // Default 4

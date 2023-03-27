@@ -15,20 +15,26 @@ public class AStarHeapNode implements Comparable<AStarHeapNode>
     public float value;         // The distance (or the A* path length estimation)
     public int counter;         // A counter to keep in order nodes with same value
     public Vec2 position;       // The position stored into the heap
+    public float cost;          // The actual cost from the robot position to <position>
+    public Vec2 parent;         // The parent node the position is reached from
 
-    public AStarHeapNode(float value, int counter, Vec2 position)
+    public AStarHeapNode(float value, int counter, Vec2 position, float cost, Vec2 parent)
     {
         this.value = value;
         this.counter = counter;
         this.position = position;
+        this.cost = cost;
+        this.parent = parent;
     }
 
 
-    public AStarHeapNode(float value, Vec2 position)
+    public AStarHeapNode(float value, Vec2 position, float cost, Vec2 parent)
     {
         this.value = value;
         this.counter = 0;
         this.position = position;
+        this.cost = cost;
+        this.parent = parent;
     }
 
 
@@ -52,7 +58,7 @@ public class AStarHeapNode implements Comparable<AStarHeapNode>
         if (other == null || other.getClass() != this.getClass())
             return false;
         AStarHeapNode otherNode = (AStarHeapNode) other;
-        return this.position.equals(otherNode.position);
+        return position.equals(otherNode.position) && counter == otherNode.counter;
     }
 
     @Override

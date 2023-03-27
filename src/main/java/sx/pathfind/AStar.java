@@ -29,6 +29,11 @@ public class AStar implements PathFinder
     public int[][] slam;                            // The current knowledge of the environment the algorithm has
 
     public Map<Vec2, Vec2> explored;                // HashMap of explored nodes to parent closest to the source
+                                                    // (needed to reconstruct the path from goal to current robot position)
+    public Map<Vec2, AStarEstimation> enqueued;     // Maps enqueued nodes to distance of discovered paths and the
+                                                    // computed heuristics to target. In this way, we avoid computing the heuristics
+                                                    // more than once and inserting the node into the queue too many times.
+    //public float[][] dists;                         // Matrix of distances to cover to reach each position
 
     // Logger time stamp format
     public SimpleDateFormat time = new SimpleDateFormat("HH:mm:ss.SSS");
@@ -44,9 +49,12 @@ public class AStar implements PathFinder
 
         this.path = new LinkedList<>();
         this.heap = new PriorityQueue<>();
-        this.explored = new HashMap<>();
-        heap.add(new AStarHeapNode(0.0f, 0, current));
+        heap.add(new AStarHeapNode(0.0f, 0, current, 0.0f, null));
         counter = 0;
+
+        this.explored = new HashMap<>();
+        this.enqueued = new HashMap<>();
+        //this.dists = new float[slam.length][slam[0].length];
     }
 
 
@@ -70,15 +78,33 @@ public class AStar implements PathFinder
     }
 
 
-    /* Compute the heap node and the priority associated with a position */
-    public AStarHeapNode computeHeapNode(Vec2 position)
+    /*
+        Compute the heap node and the priority associated with a position.
+        Just a wrapper in order not to manage the counter.
+    */
+    public AStarHeapNode computeHeapNode(float estimation, Vec2 position, float cost, Vec2 parent)
     {
-        return new AStarHeapNode(
-            moveCost(current, position) + euclidean(position, goal),
-                ++counter,
-                position
+        return new AStarHeapNode(estimation, ++counter, position, cost, parent);
+    }
+
+
+    /*
+    Compute the estimation of a position to store in enqueue hashmap in order
+    to avoid to compute the heuristic too many times.
+
+    public AStarEstimation computeEstimation (Vec2 position)
+    {
+        return new AStarEstimation(
+            position,
+            dists[expandingNode.x][expandingNode.y] + moveCost(expandingNode, position),
+            euclidean(position, goal),
+            current,
+            goal
         );
     }
+    */
+
+
 
     /*
         This method reset the computed path after a change in the environment
@@ -89,9 +115,11 @@ public class AStar implements PathFinder
         expandingNode = current;
         path = new LinkedList<>();
         heap = new PriorityQueue<>();
-        explored = new HashMap<>();
-        heap.add(new AStarHeapNode(0.0f, 0, current));
+        heap.add(new AStarHeapNode(0.0f, 0, current, 0.0f, null));
         counter = 0;
+        this.explored = new HashMap<>();
+        this.enqueued = new HashMap<>();
+        //this.dists = new float[slam.length][slam[0].length];
     }
 
 
@@ -103,7 +131,8 @@ public class AStar implements PathFinder
         if (current.equals(goal))
             return;
         // Next step
-        current = path.removeFirst();
+        path.removeFirst();
+        current = path.getFirst();
         covered.add(current);
     }
 
@@ -115,19 +144,20 @@ public class AStar implements PathFinder
     @Override
     public void extractPath() throws NoPathFound
     {
-        /*
-        path = [curnode]
-        node = parent
-        while node is not None:
-            path.append(node)
-            node = explored[node]
-        path.reverse()
-         */
         path = new LinkedList<>();
+        path.add(goal);
+        Vec2 node = explored.get(goal);
 
-
+        while (node != null)
+        {
+            path.add(node);
+            node = explored.get(node);
+        }
         Collections.reverse(path);
 
+        // Path not found
+        if (!path.getFirst().equals(current))
+            throw new NoPathFound("[" + time.format(new Date()) + "][ERROR] No path found");
     }
 
 
@@ -142,21 +172,65 @@ public class AStar implements PathFinder
     @Override
     public void computeStartingPath()
     {
-        /*
-        # Maps enqueued nodes to distance of discovered paths and the
-        # computed heuristics to target. We avoid computing the heuristics
-        # more than once and inserting the node into the queue too many times.
-        enqueued = {}
-        # Maps explored nodes to parent closest to the source.
-        explored = {}
 
-         */
         // Start expanding the current robot position
         expandingNode = current;
 
         while (heap.peek() != null && !expandingNode.equals(goal))
         {
+            // Pop the next node to expand (at first iteration it's the current robot position)
+            AStarHeapNode expandingHeapNode = heap.poll();
 
+            // Extract information from the node
+            expandingNode = expandingHeapNode.position;
+            float dist = expandingHeapNode.cost;
+            Vec2 parent = expandingHeapNode.parent;
+
+            if (explored.containsKey(expandingNode))
+            {
+                // Do not override the parent of current robot position
+                if (explored.get(expandingNode) == null)
+                    continue;
+
+                // Skip bad paths enqueued before finding a shorter one
+                AStarEstimation estimation = enqueued.get(expandingNode);
+                if (estimation.cost < dist)
+                    continue;
+            }
+
+            // Set parent
+            explored.put(expandingNode, parent);
+
+            for (Vec2 neighbour : getNeighbours(expandingNode))
+            {
+                float ncost = dist + moveCost(expandingNode, neighbour);
+                float heuristic;
+                if (enqueued.containsKey(neighbour))
+                {
+
+                    AStarEstimation estimation = enqueued.get(expandingNode);
+                    heuristic = estimation.h;
+
+                    if (estimation.cost < ncost)
+                        continue;
+
+                } else
+                {
+
+                    heuristic = euclidean(neighbour, goal);
+
+                }
+
+                enqueued.put(neighbour, new AStarEstimation(neighbour, ncost, heuristic));
+                heap.add(computeHeapNode(ncost + heuristic, neighbour, ncost, expandingNode));
+            }
+
+        }
+
+        try {
+            extractPath();
+        } catch (NoPathFound ex) {
+            throw new RuntimeException(ex);
         }
     }
 
@@ -164,7 +238,7 @@ public class AStar implements PathFinder
     /*
         Method used to update the SLAM (i.e., the view the robot has
         of the environment).
-     */
+    */
     @Override
     public void updateSlam(Vec2 position, int value)
     {
@@ -174,17 +248,18 @@ public class AStar implements PathFinder
 
     /* Return the robot current position known by the algorithm */
     @Override
-    public Vec2 getCurrent() {
+    public Vec2 getCurrent()
+    {
         return current;
     }
 
 
     /* Method to return the currently considered minimum path */
     @Override
-    public LinkedList<Vec2> getPath() {
+    public LinkedList<Vec2> getPath()
+    {
         return path;
     }
-
 
 
     /*
@@ -201,7 +276,7 @@ public class AStar implements PathFinder
             {
 
                 if (
-                        (i != position.x || j != position.y) &&       // Exclude the exact position
+                        (i != position.x || j != position.y) &&               // Exclude the exact position
                                 i >= 0 &&                                     // Check we are inside the grid
                                 i < slam.length &&                            // Check we are inside the grid
                                 j >= 0 &&                                     // Check we are inside the grid
