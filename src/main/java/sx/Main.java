@@ -1,8 +1,12 @@
 package sx;
 
+import sx.pathfind.AStar;
+import sx.pathfind.AStarHeapNode;
 import sx.pathfind.DStar;
 import processing.core.PApplet;
 import sx.pathfind.PathFinderTester;
+
+import java.util.PriorityQueue;
 
 
 public class Main

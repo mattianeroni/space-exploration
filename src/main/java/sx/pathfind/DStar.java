@@ -23,7 +23,7 @@ public class DStar implements PathFinder
     public float km;                                // Accumulation factor
     public Vec2 source, goal, current, last;        // Starting and ending positions, the current position where the robot is,
                                                     // and the last position visited by the robot
-    public boolean changed = false;                 // A flag that says if new obstacles have been found
+    //public boolean changed = false;                 // A flag that says if new obstacles have been found
     public Set<Vec2> covered;                       // The set of positions covered by the robot
     public LinkedList<Vec2> path;                   // The current minimum path to the goal
 
@@ -264,8 +264,8 @@ public class DStar implements PathFinder
     {
         while (
                 heap.peek() != null &&
-                        (heap.peek().compareTo(computeHeapNode(current)) < 0  ||
-                                rhs[current.x][current.y] > g[current.x][current.y])
+                (heap.peek().compareTo(computeHeapNode(current)) < 0  ||
+                rhs[current.x][current.y] > g[current.x][current.y])
         ) {
             DStarHeapNode node = heap.poll();
             Vec2 position = node.position;
@@ -410,7 +410,8 @@ public class DStar implements PathFinder
 
 
 
-    /* Method  */
+    /* Method to return the currently considered minimum path */
+    @Override
     public LinkedList<Vec2> getPath()
     {
         return path;

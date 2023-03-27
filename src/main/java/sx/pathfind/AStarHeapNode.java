@@ -6,19 +6,40 @@ import sx.Vec2;
 
 public class AStarHeapNode implements Comparable<AStarHeapNode>
 {
-    public float value;
-    public Vec2 position;
+
+    /*
+        An instance of this class represent a node of the priority queue used by
+        the A* algorithm.
+    */
+
+    public float value;         // The distance (or the A* path length estimation)
+    public int counter;         // A counter to keep in order nodes with same value
+    public Vec2 position;       // The position stored into the heap
+
+    public AStarHeapNode(float value, int counter, Vec2 position)
+    {
+        this.value = value;
+        this.counter = counter;
+        this.position = position;
+    }
+
 
     public AStarHeapNode(float value, Vec2 position)
     {
         this.value = value;
+        this.counter = 0;
         this.position = position;
     }
+
 
     @Override
     public int compareTo(AStarHeapNode other)
     {
-        return this.value < other.value ? -1 : 1;
+        if (value == other.value) {
+            if (counter == other.counter) return 0;
+            return counter < other.counter ? -1 : 1;
+        }
+        return value < other.value ? -1 : 1;
     }
 
     @Override
