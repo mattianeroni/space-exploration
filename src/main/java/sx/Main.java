@@ -2,6 +2,7 @@ package sx;
 
 import sx.pathfind.*;
 import processing.core.PApplet;
+import sx.pathsmoother.GradientAscent;
 
 import java.util.PriorityQueue;
 
@@ -42,8 +43,11 @@ public class Main
         // Test A* algorithm
         // Init the path finding algorithm
         AStar astar = new AStar(source, goal, slam);
+
+        GradientAscent smoother = new GradientAscent(0.6f, 0.1f);
+
         // Init the game
-        PathFinderTester tester = new PathFinderTester(astar, grid, 50);
+        PathFinderTester tester = new PathFinderTester(astar, smoother, grid, 50);
         PApplet.runSketch(new String[]{"ProcessingTest"}, tester);
 
 

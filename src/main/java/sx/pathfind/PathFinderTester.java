@@ -1,8 +1,10 @@
 package sx.pathfind;
 
+import sx.Coordinate;
 import sx.Vec2;
-import sx.pathfind.PathFinder;
 import processing.core.PApplet;
+import sx.GridToCoordinates;
+import sx.pathsmoother.PathSmoother;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -13,12 +15,13 @@ import java.util.LinkedList;
 public class PathFinderTester  extends PApplet
 {
 
-    int nCellsX, nCellsY;       // The number of cells in row and column
-    int cellSize;               // The size of a cell
-    PathFinder pathFinder;      // The path finding algorithm
-    int fps = 100;              // Frames per second
-    int[][] grid;               // The binary grid of obstacles
-    DateFormat time;            // The timeprint format
+    int nCellsX, nCellsY;           // The number of cells in row and column
+    int cellSize;                   // The size of a cell
+    PathFinder pathFinder;          // The path finding algorithm
+    int[][] grid;                   // The binary grid of obstacles
+    DateFormat time;                // The timeprint format
+    PathSmoother pathSmoother;      // The path smoothing algorithm
+    //int fps = 100;                // Frames per second
 
 
     public PathFinderTester(PathFinder pathFinder, int[][] grid, int cellSize)
@@ -28,17 +31,20 @@ public class PathFinderTester  extends PApplet
         this.nCellsX = grid.length;
         this.nCellsY = grid[0].length;
         this.grid = grid;
+        this.pathSmoother = null;
         this.time = new SimpleDateFormat("HH:mm:ss.SSS");
     }
 
-    public PathFinderTester(PathFinder pathFinder, int[][] grid, int cellSize, int fps)
+
+
+    public PathFinderTester(PathFinder pathFinder, PathSmoother pathSmoother, int[][] grid, int cellSize)
     {
         this.pathFinder = pathFinder;
         this.cellSize = cellSize;
         this.nCellsX = grid.length;
         this.nCellsY = grid[0].length;
-        this.fps = fps;
         this.grid = grid;
+        this.pathSmoother = pathSmoother;
         this.time = new SimpleDateFormat("HH:mm:ss.SSS");
     }
 
@@ -57,6 +63,7 @@ public class PathFinderTester  extends PApplet
         pathFinder.computeStartingPath();
         renderBinaryGrid();
         renderPath();
+        renderSmoothedPath();
         renderRobot();
     }
 
@@ -115,6 +122,7 @@ public class PathFinderTester  extends PApplet
         strokeWeight(1);  // Default 4
         renderBinaryGrid();
         renderPath();
+        renderSmoothedPath();
         renderRobot();
     }
 
@@ -151,6 +159,28 @@ public class PathFinderTester  extends PApplet
             float endx = path.get(i).x * cellSize + (float) cellSize / 2;
             float endy = path.get(i).y * cellSize + (float) cellSize / 2;
             line(startx, starty, endx, endy);
+            cNode = path.get(i);
+        }
+    }
+
+
+    /* Render the smoothed path */
+    public void renderSmoothedPath ()
+    {
+        if (pathSmoother == null)
+            return;
+
+        GridToCoordinates gtc = new GridToCoordinates((float) cellSize);
+        LinkedList<Coordinate> path = pathSmoother.smooth(gtc.convert(pathFinder.getPath()));
+        Coordinate cNode = path.getFirst();
+        float cellSizef = (float) cellSize;
+
+
+        for (int i = 1; i < path.size(); i++)
+        {
+            stroke(0, 0, 150);
+            strokeWeight(4);  // Default 4
+            line(cNode.x, cNode.y, path.get(i).x, path.get(i).y);
             cNode = path.get(i);
         }
     }

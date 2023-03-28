@@ -33,7 +33,6 @@ public class AStar implements PathFinder
     public Map<Vec2, AStarEstimation> enqueued;     // Maps enqueued nodes to distance of discovered paths and the
                                                     // computed heuristics to target. In this way, we avoid computing the heuristics
                                                     // more than once and inserting the node into the queue too many times.
-    //public float[][] dists;                         // Matrix of distances to cover to reach each position
 
     // Logger time stamp format
     public SimpleDateFormat time = new SimpleDateFormat("HH:mm:ss.SSS");
