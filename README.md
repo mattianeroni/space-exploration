@@ -1,7 +1,7 @@
 # Space Exploration
 Implementation of several algorithms for space and unknown terrain exploration.
 
-### Table of Contents
+## Table of Contents
 - Path finding algorithms
   - [D* Lite](#dlite) 
   - [A*](#a) 
@@ -10,22 +10,22 @@ Implementation of several algorithms for space and unknown terrain exploration.
   - [Multi-path Adaptive A*](#multi-path-a) 
 
 
-### D* Lite
+## D* Lite
 Desc
 
 
-### A*
+## A*
 Desc
 
 
-### D* Extra Lite
+## D* Extra Lite
 Desc
 
 
-### Theta*
+## Theta*
 Desc
 
 
-### Multi-path Adaptive A*
+## Multi-path Adaptive A*
 Desc
 
