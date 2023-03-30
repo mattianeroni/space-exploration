@@ -11,21 +11,21 @@ Implementation of several algorithms for space and unknown terrain exploration.
 
 <a name="dlite"/>
 ### D* Lite
-
+Desc
 
 <a name="a"/>
 ### A*
-
+Desc
 
 <a name="dextralite"/>
 ### D* Extra Lite
-
+Desc
 
 <a name="theta"/>
 ### Theta*
-
+Desc
 
 <a name="multi-path-a"/>
 ### Multi-path Adaptive A*
-
+Desc
 
