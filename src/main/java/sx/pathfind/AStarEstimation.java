@@ -1,8 +1,6 @@
 package sx.pathfind;
 
-import sx.Vec2;
-
-import java.util.Objects;
+import sx.Vec2i;
 
 public class AStarEstimation
 {
@@ -21,10 +19,10 @@ public class AStarEstimation
 
     public float cost;                          // Minimum distance from the current robot position to the position
     public float h;                             // Estimation of the distance to cover to reach the goal
-    public Vec2 position;                       // Position for which values have been estimated
+    public Vec2i position;                       // Position for which values have been estimated
 
 
-    public AStarEstimation (Vec2 position, float cost, float h)
+    public AStarEstimation (Vec2i position, float cost, float h)
     {
         this.position = position;
         this.cost = cost;

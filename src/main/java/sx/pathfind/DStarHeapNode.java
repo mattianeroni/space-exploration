@@ -1,6 +1,6 @@
 package sx.pathfind;
 
-import sx.Vec2;
+import sx.Vec2i;
 
 
 public class DStarHeapNode implements Comparable<DStarHeapNode>
@@ -9,9 +9,9 @@ public class DStarHeapNode implements Comparable<DStarHeapNode>
     /* An instance of this class represent a node into the D* heap */
 
     public float k1, k2;
-    public Vec2 position;
+    public Vec2i position;
 
-    public DStarHeapNode(float k1, float k2, Vec2 position) {
+    public DStarHeapNode(float k1, float k2, Vec2i position) {
         this.k1 = k1;
         this.k2 = k2;
         this.position = position;

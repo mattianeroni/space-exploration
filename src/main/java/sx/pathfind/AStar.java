@@ -1,6 +1,6 @@
 package sx.pathfind;
 
-import sx.Vec2;
+import sx.Vec2i;
 import sx.pathfind.exceptions.NoPathFound;
 
 import java.text.SimpleDateFormat;
@@ -20,17 +20,17 @@ public class AStar implements PathFinder
 
     public PriorityQueue<AStarHeapNode> heap;       // The priority queue of open positions to explore
     public int counter;                             // Counter of positions added to the heap
-    public Vec2 source, goal;                       // Starting and ending positions
-    public Vec2 current;                            // The current position where the robot
-    public Vec2 expandingNode;                      // The node the algorithm is currently expanding
+    public Vec2i source, goal;                       // Starting and ending positions
+    public Vec2i current;                            // The current position where the robot
+    public Vec2i expandingNode;                      // The node the algorithm is currently expanding
 
-    public Set<Vec2> covered;                       // The set of positions covered by the robot
-    public LinkedList<Vec2> path;                   // The current minimum path to the goal
+    public Set<Vec2i> covered;                       // The set of positions covered by the robot
+    public LinkedList<Vec2i> path;                   // The current minimum path to the goal
     public int[][] slam;                            // The current knowledge of the environment the algorithm has
 
-    public Map<Vec2, Vec2> explored;                // HashMap of explored nodes to parent closest to the source
+    public Map<Vec2i, Vec2i> explored;                // HashMap of explored nodes to parent closest to the source
                                                     // (needed to reconstruct the path from goal to current robot position)
-    public Map<Vec2, AStarEstimation> enqueued;     // Maps enqueued nodes to distance of discovered paths and the
+    public Map<Vec2i, AStarEstimation> enqueued;     // Maps enqueued nodes to distance of discovered paths and the
                                                     // computed heuristics to target. In this way, we avoid computing the heuristics
                                                     // more than once and inserting the node into the queue too many times.
 
@@ -38,7 +38,7 @@ public class AStar implements PathFinder
     public SimpleDateFormat time = new SimpleDateFormat("HH:mm:ss.SSS");
 
 
-    public AStar (Vec2 source, Vec2 goal, int[][] slam)
+    public AStar (Vec2i source, Vec2i goal, int[][] slam)
     {
         this.source = source;
         this.goal = goal;
@@ -58,7 +58,7 @@ public class AStar implements PathFinder
 
 
     /* The cost of moving from a position to a close position */
-    public float moveCost(Vec2 p1, Vec2 p2)
+    public float moveCost(Vec2i p1, Vec2i p2)
     {
         // Same position
         if (p1.equals(p2))
@@ -81,7 +81,7 @@ public class AStar implements PathFinder
         Compute the heap node and the priority associated with a position.
         Just a wrapper in order not to manage the counter.
     */
-    public AStarHeapNode computeHeapNode(float estimation, Vec2 position, float cost, Vec2 parent)
+    public AStarHeapNode computeHeapNode(float estimation, Vec2i position, float cost, Vec2i parent)
     {
         return new AStarHeapNode(estimation, ++counter, position, cost, parent);
     }
@@ -145,7 +145,7 @@ public class AStar implements PathFinder
     {
         path = new LinkedList<>();
         path.add(goal);
-        Vec2 node = explored.get(goal);
+        Vec2i node = explored.get(goal);
 
         while (node != null)
         {
@@ -183,7 +183,7 @@ public class AStar implements PathFinder
             // Extract information from the node
             expandingNode = expandingHeapNode.position;
             float dist = expandingHeapNode.cost;
-            Vec2 parent = expandingHeapNode.parent;
+            Vec2i parent = expandingHeapNode.parent;
 
             if (explored.containsKey(expandingNode))
             {
@@ -200,7 +200,7 @@ public class AStar implements PathFinder
             // Set parent
             explored.put(expandingNode, parent);
 
-            for (Vec2 neighbour : getNeighbours(expandingNode))
+            for (Vec2i neighbour : getNeighbours(expandingNode))
             {
                 float ncost = dist + moveCost(expandingNode, neighbour);
                 float heuristic;
@@ -239,7 +239,7 @@ public class AStar implements PathFinder
         of the environment).
     */
     @Override
-    public void updateSlam(Vec2 position, int value)
+    public void updateSlam(Vec2i position, int value)
     {
         slam[position.x][position.y] = value;
     }
@@ -247,7 +247,7 @@ public class AStar implements PathFinder
 
     /* Return the robot current position known by the algorithm */
     @Override
-    public Vec2 getCurrent()
+    public Vec2i getCurrent()
     {
         return current;
     }
@@ -255,7 +255,7 @@ public class AStar implements PathFinder
 
     /* Method to return the currently considered minimum path */
     @Override
-    public LinkedList<Vec2> getPath()
+    public LinkedList<Vec2i> getPath()
     {
         return path;
     }
@@ -265,9 +265,9 @@ public class AStar implements PathFinder
       Get the neighbours of a position by excluding the obstacles.
       NOTE: The positions occupied by obstacles are not returned.
     */
-    public List<Vec2> getNeighbours (Vec2 position)
+    public List<Vec2i> getNeighbours (Vec2i position)
     {
-        List<Vec2> neighbours = new ArrayList<>(8);
+        List<Vec2i> neighbours = new ArrayList<>(8);
 
         for (int i = position.x - 1; i < position.x + 2; i++)
         {
@@ -282,7 +282,7 @@ public class AStar implements PathFinder
                                 j < slam[0].length &&                         // Check we are inside the grid
                                 slam[i][j] == 0                               // Avoid positions occupied by obstacles
                 )
-                    neighbours.add(new Vec2(i, j));
+                    neighbours.add(new Vec2i(i, j));
 
             }
         }
@@ -291,7 +291,7 @@ public class AStar implements PathFinder
 
 
     /* The euclidean distance between two positions */
-    public static float euclidean (Vec2 v1, Vec2 v2)
+    public static float euclidean (Vec2i v1, Vec2i v2)
     {
         if (v1.equals(v2))
             return 0.0f;

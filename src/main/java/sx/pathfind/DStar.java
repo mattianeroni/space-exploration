@@ -1,6 +1,6 @@
 package sx.pathfind;
 
-import sx.Vec2;
+import sx.Vec2i;
 import sx.pathfind.exceptions.NoPathFound;
 
 import java.text.SimpleDateFormat;
@@ -16,16 +16,16 @@ public class DStar implements PathFinder
     */
 
     public PriorityQueue<DStarHeapNode> heap;       // The heap of next positions to visit
-    public Map<Vec2, DStarHeapNode> inconsistents;  // The set of map of inconsistent nodes (used only because
+    public Map<Vec2i, DStarHeapNode> inconsistents;  // The set of map of inconsistent nodes (used only because
                                                     // looking for an element in a hash map is computationally faster than
                                                     // looking for it in the queue
 
     public float km;                                // Accumulation factor
-    public Vec2 source, goal, current, last;        // Starting and ending positions, the current position where the robot is,
+    public Vec2i source, goal, current, last;        // Starting and ending positions, the current position where the robot is,
                                                     // and the last position visited by the robot
     //public boolean changed = false;                 // A flag that says if new obstacles have been found
-    public Set<Vec2> covered;                       // The set of positions covered by the robot
-    public LinkedList<Vec2> path;                   // The current minimum path to the goal
+    public Set<Vec2i> covered;                       // The set of positions covered by the robot
+    public LinkedList<Vec2i> path;                   // The current minimum path to the goal
 
     public int[][] slam;                            // The current knowledge of the environment the algorithm has
     public float[][] rhs;                           // The second level estimate of distance between nodes and goal
@@ -35,7 +35,7 @@ public class DStar implements PathFinder
     public SimpleDateFormat time = new SimpleDateFormat("HH:mm:ss.SSS");
 
 
-    public DStar (Vec2 source, Vec2 goal, int[][] slam)
+    public DStar (Vec2i source, Vec2i goal, int[][] slam)
     {
         this.source = source;
         this.goal = goal;
@@ -97,7 +97,7 @@ public class DStar implements PathFinder
 
 
     /* The cost of moving from a position to a close position */
-    public float moveCost(Vec2 p1, Vec2 p2)
+    public float moveCost(Vec2i p1, Vec2i p2)
     {
         // Same position
         if (p1.equals(p2))
@@ -118,14 +118,14 @@ public class DStar implements PathFinder
 
     /* Return the robot current position known by the algorithm */
     @Override
-    public Vec2 getCurrent()
+    public Vec2i getCurrent()
     {
         return current;
     }
 
 
     /* Compute the heap node and the priority associated with a position */
-    public DStarHeapNode computeHeapNode (Vec2 position)
+    public DStarHeapNode computeHeapNode (Vec2i position)
     {
         int x = position.x, y = position.y;
         return new DStarHeapNode(
@@ -161,7 +161,7 @@ public class DStar implements PathFinder
 
 
     /* Update a vertex checking its consistency */
-    public void updateVertex (Vec2 position)
+    public void updateVertex (Vec2i position)
     {
         int x = position.x, y = position.y;
 
@@ -197,7 +197,7 @@ public class DStar implements PathFinder
         of the environment).
      */
     @Override
-    public void updateSlam (Vec2 position, int value)
+    public void updateSlam (Vec2i position, int value)
     {
         // No changes detected
         if (slam[position.x][position.y] == value)
@@ -214,10 +214,10 @@ public class DStar implements PathFinder
         int old_value = value == 1 ? 0 : 1;
 
         // Iterate the cell's neighbours
-        for (Vec2 neighbour : getNeighbours(position))
+        for (Vec2i neighbour : getNeighbours(position))
         {
             // Update neighbours from changed cell to neighbours
-            Vec2 u = position, v = neighbour;
+            Vec2i u = position, v = neighbour;
             slam[x][y] = old_value;
             float c_old = moveCost(u, v);        // Old cost before updating the SLAM
             slam[x][y] = value;
@@ -230,7 +230,7 @@ public class DStar implements PathFinder
             else if (rhs[u.x][u.y] == c_old + g[v.x][v.y] && !u.equals(goal))
             {
                 rhs[u.x][u.y] = Float.POSITIVE_INFINITY;
-                for (Vec2 succ : getNeighbours(u))
+                for (Vec2i succ : getNeighbours(u))
                     rhs[u.x][u.y] = Math.min(rhs[u.x][u.y], moveCost(u, succ) + g[succ.x][succ.y]);
             }
             updateVertex(u);
@@ -249,7 +249,7 @@ public class DStar implements PathFinder
             else if (rhs[u.x][u.y] == c_old + g[v.x][v.y] && !u.equals(goal))
             {
                 rhs[u.x][u.y] = Float.POSITIVE_INFINITY;
-                for (Vec2 succ : getNeighbours(u))
+                for (Vec2i succ : getNeighbours(u))
                     rhs[u.x][u.y] = Math.min(rhs[u.x][u.y], moveCost(u, succ) + g[succ.x][succ.y]);
             }
             updateVertex(u);
@@ -269,7 +269,7 @@ public class DStar implements PathFinder
                 rhs[current.x][current.y] > g[current.x][current.y])
         ) {
             DStarHeapNode node = heap.poll();
-            Vec2 position = node.position;
+            Vec2i position = node.position;
             DStarHeapNode newNode = computeHeapNode(position);
 
             if (node.compareTo(newNode) < 0) {
@@ -281,7 +281,7 @@ public class DStar implements PathFinder
 
                 g[position.x][position.y] = rhs[position.x][position.y];
                 inconsistents.remove(position);
-                for (Vec2 s : getNeighbours(position)) {
+                for (Vec2i s : getNeighbours(position)) {
                     if (!s.equals(goal))
                         rhs[s.x][s.y] = Math.min(rhs[s.x][s.y], moveCost(s, position) + g[position.x][position.y]);
                     updateVertex(s);
@@ -290,12 +290,12 @@ public class DStar implements PathFinder
             } else {
                 float g_old = g[position.x][position.y];
                 g[position.x][position.y] = Float.POSITIVE_INFINITY;
-                List<Vec2> pred = getNeighbours(position);
+                List<Vec2i> pred = getNeighbours(position);
                 pred.add(position);
-                for (Vec2 s : pred) {
+                for (Vec2i s : pred) {
                     if (rhs[s.x][s.y] == moveCost(s, position) + g_old && !s.equals(goal)) {
                         rhs[s.x][s.y] = Float.POSITIVE_INFINITY;
-                        for (Vec2 succ : getNeighbours(s))
+                        for (Vec2i succ : getNeighbours(s))
                             rhs[s.x][s.y] = Math.min(rhs[s.x][s.y], moveCost(s, succ) + g[succ.x][succ.y]);
                     }
                     updateVertex(s);
@@ -364,19 +364,19 @@ public class DStar implements PathFinder
     @Override
     public void extractPath() throws NoPathFound
     {
-        LinkedList<Vec2> path = new LinkedList<>();
-        Set<Vec2> visited = new HashSet<>();
+        LinkedList<Vec2i> path = new LinkedList<>();
+        Set<Vec2i> visited = new HashSet<>();
         path.add(current);
         visited.add(current);
-        Vec2 cNode = current;
+        Vec2i cNode = current;
 
         while (!cNode.equals(goal))
         {
-            Vec2 minNode = null;
+            Vec2i minNode = null;
             float minCost = Float.POSITIVE_INFINITY;
             float minT = Float.POSITIVE_INFINITY;
 
-            for (Vec2 next : getNeighbours(cNode))
+            for (Vec2i next : getNeighbours(cNode))
             {
 
                 float cost = g[next.x][next.y] + moveCost(cNode, next);
@@ -410,7 +410,7 @@ public class DStar implements PathFinder
 
     /* Method to return the currently considered minimum path */
     @Override
-    public LinkedList<Vec2> getPath()
+    public LinkedList<Vec2i> getPath()
     {
         return path;
     }
@@ -421,9 +421,9 @@ public class DStar implements PathFinder
       Get the neighbours of a position by excluding the obstacles.
       NOTE: The positions occupied by obstacles are not returned.
     */
-    public List<Vec2> getNeighbours (Vec2 position)
+    public List<Vec2i> getNeighbours (Vec2i position)
     {
-        List<Vec2> neighbours = new ArrayList<>(8);
+        List<Vec2i> neighbours = new ArrayList<>(8);
 
         for (int i = position.x - 1; i < position.x + 2; i++)
         {
@@ -438,7 +438,7 @@ public class DStar implements PathFinder
                       j < slam[0].length &&                         // Check we are inside the grid
                       slam[i][j] == 0                               // Avoid positions occupied by obstacles
                 )
-                    neighbours.add(new Vec2(i, j));
+                    neighbours.add(new Vec2i(i, j));
 
             }
         }
@@ -447,7 +447,7 @@ public class DStar implements PathFinder
 
 
     /* The euclidean distance between two positions */
-    public static float euclidean (Vec2 v1, Vec2 v2)
+    public static float euclidean (Vec2i v1, Vec2i v2)
     {
         if (v1.equals(v2))
             return 0.0f;

@@ -1,7 +1,7 @@
 package sx.pathfind;
 
-import sx.Coordinate;
-import sx.Vec2;
+import sx.Vec2f;
+import sx.Vec2i;
 import processing.core.PApplet;
 import sx.GridToCoordinates;
 import sx.pathsmoother.PathSmoother;
@@ -98,7 +98,7 @@ public class PathFinderTester  extends PApplet
 
                     // Remove obstacle
                     grid[x][y] = 0;
-                    pathFinder.updateSlam(new Vec2(x, y), 0);
+                    pathFinder.updateSlam(new Vec2i(x, y), 0);
                     System.out.println("[" + time.format(new Date()) + "][INFO] Removed obstacle at (" + x + "," + y + ")");
 
                 } else
@@ -106,7 +106,7 @@ public class PathFinderTester  extends PApplet
 
                     // Add obstacle
                     grid[x][y] = 1;
-                    pathFinder.updateSlam(new Vec2(x, y), 1);
+                    pathFinder.updateSlam(new Vec2i(x, y), 1);
                     System.out.println("[" + time.format(new Date()) + "][INFO] Added obstacle at (" + x + "," + y + ")");
 
                 }
@@ -148,8 +148,8 @@ public class PathFinderTester  extends PApplet
     /* Render the current minimum path */
     public void renderPath ()
     {
-        Vec2 cNode = pathFinder.getCurrent();
-        LinkedList<Vec2> path = pathFinder.getPath();
+        Vec2i cNode = pathFinder.getCurrent();
+        LinkedList<Vec2i> path = pathFinder.getPath();
         for (int i = 1; i < pathFinder.getPath().size(); i++)
         {
             stroke(0, 150, 0);
@@ -171,10 +171,9 @@ public class PathFinderTester  extends PApplet
             return;
 
         GridToCoordinates gtc = new GridToCoordinates((float) cellSize);
-        LinkedList<Coordinate> path = pathSmoother.smooth(gtc.convert(pathFinder.getPath()));
-        Coordinate cNode = path.getFirst();
+        LinkedList<Vec2f> path = pathSmoother.smooth(gtc.convert(pathFinder.getPath()));
+        Vec2f cNode = path.getFirst();
         float cellSizef = (float) cellSize;
-
 
         for (int i = 1; i < path.size(); i++)
         {

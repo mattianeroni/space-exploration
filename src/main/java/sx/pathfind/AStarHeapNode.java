@@ -1,6 +1,6 @@
 package sx.pathfind;
 
-import sx.Vec2;
+import sx.Vec2i;
 
 
 
@@ -14,11 +14,11 @@ public class AStarHeapNode implements Comparable<AStarHeapNode>
 
     public float value;         // The distance (or the A* path length estimation)
     public int counter;         // A counter to keep in order nodes with same value
-    public Vec2 position;       // The position stored into the heap
+    public Vec2i position;       // The position stored into the heap
     public float cost;          // The actual cost from the robot position to <position>
-    public Vec2 parent;         // The parent node the position is reached from
+    public Vec2i parent;         // The parent node the position is reached from
 
-    public AStarHeapNode(float value, int counter, Vec2 position, float cost, Vec2 parent)
+    public AStarHeapNode(float value, int counter, Vec2i position, float cost, Vec2i parent)
     {
         this.value = value;
         this.counter = counter;
@@ -28,7 +28,7 @@ public class AStarHeapNode implements Comparable<AStarHeapNode>
     }
 
 
-    public AStarHeapNode(float value, Vec2 position, float cost, Vec2 parent)
+    public AStarHeapNode(float value, Vec2i position, float cost, Vec2i parent)
     {
         this.value = value;
         this.counter = 0;

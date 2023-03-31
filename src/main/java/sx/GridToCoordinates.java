@@ -1,7 +1,5 @@
 package sx;
 
-import sx.Coordinate;
-import sx.Vec2;
 import java.util.LinkedList;
 
 
@@ -14,7 +12,7 @@ public class GridToCoordinates
         2-dimensional space.
     */
 
-    LinkedList<Coordinate> path;
+    LinkedList<Vec2f> path;
     float cellSize;
 
     public GridToCoordinates (float cellSize)
@@ -24,10 +22,10 @@ public class GridToCoordinates
     }
 
 
-    public LinkedList<Coordinate> convert (LinkedList<Vec2> originalPath)
+    public LinkedList<Vec2f> convert (LinkedList<Vec2i> originalPath)
     {
-        for (Vec2 position : originalPath)
-            path.add( new Coordinate(position.x * cellSize + (cellSize / 2.0f), position.y * cellSize + (cellSize / 2.0f)) );
+        for (Vec2i position : originalPath)
+            path.add( new Vec2f(position.x * cellSize + (cellSize / 2.0f), position.y * cellSize + (cellSize / 2.0f)) );
         return path;
     }
 

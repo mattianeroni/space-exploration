@@ -1,6 +1,6 @@
 package sx.pathfind;
 
-import sx.Vec2;
+import sx.Vec2i;
 import sx.pathfind.exceptions.NoPathFound;
 
 import java.util.LinkedList;
@@ -40,7 +40,7 @@ public interface PathFinder
 
 
     /* Method to update the algorithm SLAM --i.e., the knowledge the algorithm has of the environment */
-    void updateSlam(Vec2 position, int value);
+    void updateSlam(Vec2i position, int value);
 
 
     /* Method to update the robot position and move it to the next planned position */
@@ -48,10 +48,10 @@ public interface PathFinder
 
 
     /* Method to return the current position occupied by the robot known by the algorithm */
-    Vec2 getCurrent();
+    Vec2i getCurrent();
 
 
     /* Method to get the current minimum path */
-    LinkedList<Vec2> getPath();
+    LinkedList<Vec2i> getPath();
 
 }
