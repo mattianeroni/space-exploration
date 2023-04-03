@@ -11,8 +11,10 @@ Implementation of several algorithms for space and unknown terrain exploration.
 
 
 ## D* Lite
-Desc
 
+Path finding algorithms specifically designed for unknown environmments. Its efficiency lays in the possibility to find a new path without entirely recompute the whole path from goal o source.
+
+Algorithm described in _Koenig, S., & Likhachev, M. (2005). Fast replanning for navigation in unknown terrain. IEEE Transactions on Robotics, 21(3), 354–363._
 
 <img src="https://github.com/mattianeroni/space-exploration/blob/main/images/dstar.gif" width="800" height="380">
 
