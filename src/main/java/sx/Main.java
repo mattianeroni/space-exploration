@@ -5,9 +5,7 @@ import processing.core.PApplet;
 import sx.pathsmoother.GeometricSmoother;
 import sx.pathsmoother.GradientAscent;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 
 public class Main
@@ -36,37 +34,24 @@ public class Main
 
         // Initialise the path smoother
         //GradientAscent smoother = new GradientAscent(0.9f, 0.1f);
-        GeometricSmoother smoother = new GeometricSmoother(30.0f, 0.1f);
+        GeometricSmoother smoother = new GeometricSmoother(30.0f, 2.0f);
 
         // Test D* Lite algorithm
         // Init the path finding algorithm
-        //DStar dstar = new DStar(source, goal, slam);
+        DStar dstar = new DStar(source, goal, slam);
         // Init the game
-        //PathFinderTester tester = new PathFinderTester(dstar, smoother, grid, 50);
-        //PApplet.runSketch(new String[]{"ProcessingTest"}, tester);
+        PathFinderTester tester = new PathFinderTester(dstar, smoother, grid, 50);
+        PApplet.runSketch(new String[]{"ProcessingTest"}, tester);
 
 
         // Test A* algorithm
         // Init the path finding algorithm
-        AStar astar = new AStar(source, goal, slam);
+        //AStar astar = new AStar(source, goal, slam);
 
         // Init the game
-        PathFinderTester tester = new PathFinderTester(astar, smoother, grid, 50);
-        PApplet.runSketch(new String[]{"ProcessingTest"}, tester);
+        //PathFinderTester tester = new PathFinderTester(astar, smoother, grid, 50);
+        //PApplet.runSketch(new String[]{"ProcessingTest"}, tester);
 
-        /*
-        Vec2f a = new Vec2f(0.0f, 0.0f);
-        Vec2f b = new Vec2f(-10.0f, -100.0f);
-        Vec2f c = new Vec2f(0.0f, 5.0f);
-        float radius = 10.0f;
-        Vec2f p = getCircleLineIntersectionPoint(a, b, c, radius);
-
-        if (p != null)
-            System.out.println(p.repr());
-        else
-            System.out.println(p);
-
-        */
     }
 
 

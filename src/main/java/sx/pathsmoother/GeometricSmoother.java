@@ -1,11 +1,7 @@
 package sx.pathsmoother;
 
 import sx.Vec2f;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 
 public class GeometricSmoother implements PathSmoother
@@ -25,15 +21,9 @@ public class GeometricSmoother implements PathSmoother
                                             // path finding algorithm.
     public float granularity;               // The distance between consecutive positions in the smoother path.
 
-    private Vec2f currentPos;               // The current position of the robot on the smoothed path under construction
-
-    private List<Vec2f> path;               // The path we are currently smoothing
-    private Vec2f lastTarget;               // The last considered target point of the original path
-    private Vec2f nextTarget;               // The currently considered next target point of the original path
-    private int nextTargetId;               // The position of the next target in the path to smooth
-    private Vec2f finalTarget;              // The final position to reach
-
     public LinkedList<Vec2f> smoothedPath;  // The last smoothed path
+    private Vec2f currentPos;               // The current position of the robot on the smoothed path under construction
+    private Vec2f finalTarget;              // The final position to reach
 
 
     public GeometricSmoother (float lookAhead, float granularity)
@@ -48,14 +38,9 @@ public class GeometricSmoother implements PathSmoother
     public LinkedList<Vec2f> smooth (LinkedList<Vec2f> pathToSmooth)
     {
         // Initialise all class attributes to use them in other method easily
-        path = new ArrayList<>();
-        path.addAll(pathToSmooth);
         smoothedPath = new LinkedList<>();
         currentPos = pathToSmooth.getFirst();
         smoothedPath.add(currentPos);
-        lastTarget = pathToSmooth.getFirst();
-        nextTarget = pathToSmooth.get(1);
-        nextTargetId = 1;
         finalTarget = pathToSmooth.getLast();
 
         // Step-by-step smoothed path construction
@@ -71,12 +56,12 @@ public class GeometricSmoother implements PathSmoother
             }
 
             // Get the horizon point
-            Vec2f horizon = getHorizon();
-
+            Vec2f horizon = getHorizon(pathToSmooth);
 
             // Get the next position making a step as big as the granularity
             // in the direction of the horizon
-            currentPos = getCircleLineIntersection(currentPos, horizon, currentPos, granularity); //.get(0);
+            // NOTE: Only one intersection is always possible here
+            currentPos = getCircleLineIntersection(currentPos, horizon, currentPos, granularity).get(0);
             smoothedPath.add(currentPos);
 
         }
@@ -86,32 +71,37 @@ public class GeometricSmoother implements PathSmoother
 
 
     /* Return the current target position in a smooth space seen by the robot */
-    public Vec2f getHorizon ()
+    public Vec2f getHorizon (LinkedList<Vec2f> path)
     {
-        // The next target is already the final target
-        if (nextTarget.equals(finalTarget))
+        // Close to target
+        if (euclidean(currentPos, finalTarget) <= lookAhead)
             return finalTarget;
 
-        // Look for a horizon on the currently considered future segment
-        Vec2f horizon = getCircleLineIntersection(currentPos, nextTarget, currentPos, lookAhead);
+        List<Vec2f> horizonOptions;
+        Iterator<Vec2f> startIter = path.descendingIterator();
+        Iterator<Vec2f> endIter = path.descendingIterator();
+        startIter.next();
 
-
-        // If no intersection with current segment
-        while (horizon == null && ++nextTargetId < path.size())
+        while (startIter.hasNext())
         {
             // Next segment is considered
-            lastTarget = nextTarget;
-            nextTarget = path.get(nextTargetId);
-            horizon = getCircleLineIntersection(currentPos, nextTarget, currentPos, lookAhead);
+            Vec2f startNode = startIter.next();
+            Vec2f endNode = endIter.next();
+            horizonOptions = getCircleLineIntersection(startNode, endNode, currentPos, lookAhead);
+
+            // Only one intersection
+            if (horizonOptions.size() == 1)
+                return horizonOptions.get(0);
+            // If two intersection the closest to the end of the segment is considered
+            else if (horizonOptions.size() == 2)
+            {
+                if (euclidean(horizonOptions.get(0), endNode) < euclidean(horizonOptions.get(1), endNode))
+                    return horizonOptions.get(0);
+                return horizonOptions.get(1);
+            }
         }
 
-        // The lookAhead is going over the final target, hence teh horizon is set
-        // equal to final target
-        if (horizon == null)
-            return finalTarget;
-
-        return horizon;
-
+        return null;
     }
 
 
@@ -120,7 +110,7 @@ public class GeometricSmoother implements PathSmoother
         Given a segment (line) and a circle in a 2-dimensional space,
         this method returns the intersection point.
     */
-    public static Vec2f getCircleLineIntersection (Vec2f lineStart, Vec2f lineEnd, Vec2f center, float radius)
+    public static List<Vec2f> getCircleLineIntersection (Vec2f lineStart, Vec2f lineEnd, Vec2f center, float radius)
     {
         float baX = lineEnd.x - lineStart.x;
         float baY = lineEnd.y - lineStart.y;
@@ -135,7 +125,7 @@ public class GeometricSmoother implements PathSmoother
         float q = c / a;
 
         float disc = pBy2 * pBy2 - q;
-        if (disc < 0) return null;
+        if (disc < 0) return Collections.emptyList();
 
         float tmpSqrt = (float) Math.sqrt(disc);
         float abScalingFactor1 = -pBy2 + tmpSqrt;
@@ -146,16 +136,16 @@ public class GeometricSmoother implements PathSmoother
         float maxY = Math.max(lineStart.y, lineEnd.y);
         float minY = Math.min(lineStart.y, lineEnd.y);
 
-
+        List<Vec2f> result = new ArrayList<>(2);
         Vec2f p1 = new Vec2f(lineStart.x - baX * abScalingFactor1, lineStart.y - baY * abScalingFactor1);
         if (minX <= p1.x && p1.x <= maxX && minY <= p1.y && p1.y <= maxY)
-            return p1;
+            result.add(p1);
 
         Vec2f p2 = new Vec2f( lineStart.x - baX * abScalingFactor2, lineStart.y - baY * abScalingFactor2);
         if (minX <= p2.x && p2.x <= maxX && minY <= p2.y && p2.y <= maxY)
-            return p2;
+            result.add(p2);
 
-        return null;
+        return result;
     }
 
 

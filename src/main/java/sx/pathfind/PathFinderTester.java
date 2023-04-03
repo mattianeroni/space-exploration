@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.LinkedList;
 
 
+
 public class PathFinderTester  extends PApplet
 {
 
@@ -138,7 +139,8 @@ public class PathFinderTester  extends PApplet
                 {
                     fill(120);
                     stroke(120);
-                    rect(i * cellSize, j * cellSize, cellSize, cellSize);
+                    //rect(i * cellSize, j * cellSize, cellSize, cellSize);
+                    ellipse(i * cellSize + (float) cellSize / 2.0f, j * cellSize + (float) cellSize / 2.0f, (float) cellSize * 0.8f, (float) cellSize * 0.8f);
                 }
             }
         }
