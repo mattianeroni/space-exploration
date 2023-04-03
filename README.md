@@ -12,6 +12,7 @@ Implementation of several algorithms for space and unknown terrain exploration.
 
 ## D* Lite
 Desc
+![](https://github.com/mattianeroni/space-exploration/blob/main/images/dstar.gif)
 
 
 ## A*
