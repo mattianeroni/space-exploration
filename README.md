@@ -14,7 +14,7 @@ Implementation of several algorithms for space and unknown terrain exploration.
 Desc
 
 
-<img src="https://github.com/mattianeroni/space-exploration/blob/main/images/dstar.gif" width="1000" height="480">
+<img src="https://github.com/mattianeroni/space-exploration/blob/main/images/dstar.gif" width="800" height="380">
 
                                                                                                                                              
 
