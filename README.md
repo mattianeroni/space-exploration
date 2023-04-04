@@ -25,7 +25,7 @@ Algorithm described in _Koenig, S., & Likhachev, M. (2005). Fast replanning for 
 
 Efficient path finding algorithm generally described and a natural evolution of Djikstra after the introduction of the direction's concept.
 
-Algorithm described in _ Hart, P. E.; Nilsson, N.J.; Raphael, B. (1968). "A Formal Basis for the Heuristic Determination of Minimum Cost Paths". IEEE Transactions on Systems Science and Cybernetics. 4 (2): 100–7._
+Algorithm described in _Hart, P. E.; Nilsson, N.J.; Raphael, B. (1968). "A Formal Basis for the Heuristic Determination of Minimum Cost Paths". IEEE Transactions on Systems Science and Cybernetics. 4 (2): 100–7._
 
 <img src="https://github.com/mattianeroni/space-exploration/blob/main/images/astar.gif" width="800" height="380">
 
