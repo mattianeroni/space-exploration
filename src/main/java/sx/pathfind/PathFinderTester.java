@@ -199,9 +199,6 @@ public class PathFinderTester  extends PApplet
 
 
     /*
-      Method to render the RHS and G values associated with the grid map.
-      This method works only for D* inspired algorithms.
-
     public void renderEstimation ()
     {
         for (int i = 0; i < grid.length ; i++)
@@ -218,8 +215,8 @@ public class PathFinderTester  extends PApplet
 
             }
         }
-    }
-    */
+    }*/
+
 
 }
 

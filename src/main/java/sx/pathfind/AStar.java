@@ -47,6 +47,7 @@ public class AStar implements PathFinder
         this.slam = slam;
 
         this.path = new LinkedList<>();
+        this.covered = new HashSet<>();
         this.heap = new PriorityQueue<>();
         heap.add(new AStarHeapNode(0.0f, 0, current, 0.0f, null));
         counter = 0;
@@ -87,22 +88,6 @@ public class AStar implements PathFinder
     }
 
 
-    /*
-    Compute the estimation of a position to store in enqueue hashmap in order
-    to avoid to compute the heuristic too many times.
-
-    public AStarEstimation computeEstimation (Vec2 position)
-    {
-        return new AStarEstimation(
-            position,
-            dists[expandingNode.x][expandingNode.y] + moveCost(expandingNode, position),
-            euclidean(position, goal),
-            current,
-            goal
-        );
-    }
-    */
-
 
 
     /*
@@ -114,11 +99,12 @@ public class AStar implements PathFinder
         expandingNode = current;
         path = new LinkedList<>();
         heap = new PriorityQueue<>();
+        this.covered = new HashSet<>();
         heap.add(new AStarHeapNode(0.0f, 0, current, 0.0f, null));
         counter = 0;
         this.explored = new HashMap<>();
         this.enqueued = new HashMap<>();
-        //this.dists = new float[slam.length][slam[0].length];
+
     }
 
 

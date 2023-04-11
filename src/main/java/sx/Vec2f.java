@@ -42,4 +42,14 @@ public class Vec2f
         return new Vec2f(x, y);
     }
 
+    public float getX ()
+    {
+        return x;
+    }
+
+    public float getY()
+    {
+        return y;
+    }
+
 }

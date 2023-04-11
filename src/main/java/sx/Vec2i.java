@@ -1,8 +1,10 @@
 package sx;
 
+import org.locationtech.jts.geom.Envelope;
+
 import java.util.Objects;
 
-public class Vec2i
+public class Vec2i extends Envelope
 {
 
     /* An instance of this class represents a point in a 2-dimensional space */
@@ -13,6 +15,7 @@ public class Vec2i
 
     public Vec2i(int x, int y)
     {
+        super(0, 20, 0, 20);
         this.x = x; this.y = y;
     }
 
@@ -23,6 +26,16 @@ public class Vec2i
             return false;
         Vec2i otherVec = (Vec2i) other;
         return this.x == otherVec.x && this.y == otherVec.y;
+    }
+
+    public int getX ()
+    {
+        return x;
+    }
+
+    public int getY()
+    {
+        return y;
     }
 
 
