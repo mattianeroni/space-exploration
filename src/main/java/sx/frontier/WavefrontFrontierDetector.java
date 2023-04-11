@@ -1,5 +1,6 @@
 package sx.frontier;
 
+import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.index.quadtree.Quadtree;
 import sx.Vec2i;
 
@@ -45,7 +46,7 @@ public class WavefrontFrontierDetector implements FrontierDetector
     }
 
 
-    public PriorityQueue<FrontierHeapNode> initExplorationQueue ()
+    public PriorityQueue<FrontierHeapNode> initExplorationQueue()
     {
 
         PriorityQueue<FrontierHeapNode> queue = new PriorityQueue<>();
@@ -53,15 +54,20 @@ public class WavefrontFrontierDetector implements FrontierDetector
         if (frontiers.size() == 0) {
             heapCounter = 1;
             queue.add(new FrontierHeapNode(0, robotPos));
-        } else
+            return queue;
+        }
+
+        heapCounter = 0;
+        List<Frontier> toRecompute = rtree.query(new Envelope(minBound.x, maxBound.x, minBound.y, maxBound.y));
+        for (Frontier f : toRecompute)
         {
-
-            frontiers = new ArrayList<>();
-            this.rtree = new Quadtree();
-            visited = new int[slam.length][slam[0].length];
-
-            heapCounter = 1;
-            queue.add(new FrontierHeapNode(0, robotPos));
+            rtree.remove(f.box, f);
+            frontiers.remove(f);
+            for (Vec2i cell : f.cells)
+            {
+                visited[cell.x][cell.y] = 0;
+                queue.add(new FrontierHeapNode(heapCounter++, cell));
+            }
         }
 
         return queue;
@@ -79,12 +85,14 @@ public class WavefrontFrontierDetector implements FrontierDetector
             FrontierHeapNode expandingNode = queue.poll();
             Vec2i position = expandingNode.position;
 
+            // Exit if the position has already been visited
             if (visited[position.x][position.y] == 1)
                 continue;
 
-            // If it is not a frontier, it is marked as visited and expanded
+            // It is marked as visited and expanded
             visited[position.x][position.y] = 1;
 
+            // If the position is not a frontier it is expanded
             if (!isFrontier(position))
             {
                 for (Vec2i i : getNeighbours(position))

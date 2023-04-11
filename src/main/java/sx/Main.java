@@ -21,8 +21,8 @@ public class Main
 {
 
     // The size of the grid map
-    static int ROWS = 50;
-    static int COLS = 25;
+    static int ROWS = 100;
+    static int COLS = 50;
 
 
     public static void main (String[] args)
