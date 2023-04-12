@@ -4,6 +4,7 @@ import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.index.SpatialIndex;
 import org.locationtech.jts.index.quadtree.Quadtree;
 import org.locationtech.jts.index.strtree.STRtree;
+import org.locationtech.jts.triangulate.quadedge.QuadEdgeSubdivision;
 import sx.frontier.Frontier;
 import sx.frontier.FrontierDetectorTester;
 import sx.frontier.WavefrontFrontierDetector;

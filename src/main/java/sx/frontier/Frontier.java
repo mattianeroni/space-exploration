@@ -46,7 +46,7 @@ public class Frontier
             maxX = Math.max(maxX, cell.x);
             maxY = Math.max(maxY, cell.y);
         }
-        this.box = new Envelope(minX, maxX, minY, maxY);
+        this.box = new Envelope(minX - 1, maxX + 1, minY - 1, maxY + 1);
 
     }
 

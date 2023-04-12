@@ -147,6 +147,7 @@ public class FrontierDetectorTester extends PApplet
         background(220);
         float ballSize = (float) cellSize * 0.8f;
 
+
         for (int i = 0; i < grid.length ; i++)
         {
             for (int j = 0; j < grid[0].length; j++)
@@ -175,8 +176,6 @@ public class FrontierDetectorTester extends PApplet
     {
         List<Frontier> frontierList = frontierDetector.getFrontiers();
         float ballSize = (float) cellSize * 0.8f;
-
-        System.out.println(frontierList.size());
 
         for (Frontier frontier : frontierList)
         {

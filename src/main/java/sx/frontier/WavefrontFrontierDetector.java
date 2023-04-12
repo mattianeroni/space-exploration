@@ -2,6 +2,7 @@ package sx.frontier;
 
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.index.quadtree.Quadtree;
+import org.locationtech.jts.index.strtree.STRtree;
 import sx.Vec2i;
 
 import java.util.*;
@@ -59,6 +60,7 @@ public class WavefrontFrontierDetector implements FrontierDetector
 
         heapCounter = 0;
         List<Frontier> toRecompute = rtree.query(new Envelope(minBound.x, maxBound.x, minBound.y, maxBound.y));
+        System.out.println("Expanded " + toRecompute.size());
         for (Frontier f : toRecompute)
         {
             rtree.remove(f.box, f);
@@ -106,6 +108,8 @@ public class WavefrontFrontierDetector implements FrontierDetector
             expandFrontierFrom(position);
 
         }
+        this.minBound = new Vec2i(Integer.MAX_VALUE, Integer.MAX_VALUE);
+        this.maxBound = new Vec2i(Integer.MIN_VALUE, Integer.MIN_VALUE);
     }
 
 
