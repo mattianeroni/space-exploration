@@ -5,9 +5,8 @@ Implementation of several algorithms for space and unknown terrain exploration.
 - Path finding algorithms
   - [D* Lite](#dlite) 
   - [A*](#a) 
-  - [D* Extra Lite](#dextralite) 
-  - [Theta*](#theta) 
-  - [Multi-path Adaptive A*](#multi-path-a) 
+- Frontier detection algorithms 
+- Trajectory planning algorithms
 
 
 ## D* Lite
@@ -29,14 +28,5 @@ Algorithm described in _Hart, P. E.; Nilsson, N.J.; Raphael, B. (1968). "A Forma
 
 <img src="https://github.com/mattianeroni/space-exploration/blob/main/images/astar.gif" width="800" height="380">
 
-## D* Extra Lite
-Desc
 
-
-## Theta*
-Desc
-
-
-## Multi-path Adaptive A*
-Desc
 
