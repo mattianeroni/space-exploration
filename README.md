@@ -6,7 +6,7 @@ Implementation of several algorithms for space and unknown terrain exploration.
   - [D* Lite](#dlite) 
   - [A*](#a) 
 - Frontier detection algorithms 
-- Trajectory planning algorithms
+- Path Smoothing
 
 
 ## D* Lite
@@ -28,5 +28,20 @@ Algorithm described in _Hart, P. E.; Nilsson, N.J.; Raphael, B. (1968). "A Forma
 
 <img src="https://github.com/mattianeroni/space-exploration/blob/main/images/astar.gif" width="50%" height="50%">
 
+
+
+
+## Frontier Detection
+
+Efficient frontier detection algorithm inspired by the Expanding Wavefront Frontier Detection algorithm presented in _Quin, P., Alempijevic, A., Paul, G., & Liu, D. (2014, January). Expanding wavefront frontier detection: An approach for efficiently detecting frontier cells. In Australasian Conference on Robotics and Automation, ACRA._, but made faster through the implementation of an [RTree](https://it.wikipedia.org/wiki/R-tree) able to detect the only frontiers expanded by the robot at each iteration.
+
+<img src="https://github.com/mattianeroni/space-exploration/blob/main/images/frontier.png" >
+
+
+
+
+## Path Smoothing
+
+Two path smoothing algorithms.
 
 
