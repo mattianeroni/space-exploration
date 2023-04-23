@@ -15,7 +15,7 @@ Path finding algorithms specifically designed for unknown environmments. Its eff
 
 Algorithm described in _Koenig, S., & Likhachev, M. (2005). Fast replanning for navigation in unknown terrain. IEEE Transactions on Robotics, 21(3), 354–363._
 
-<img src="https://github.com/mattianeroni/space-exploration/blob/main/images/dstar.gif" width="800" height="380">
+<img src="https://github.com/mattianeroni/space-exploration/blob/main/images/dstar.gif" width="50%" height="50%">
 
                                                                                                                                              
 
