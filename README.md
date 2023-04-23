@@ -35,7 +35,7 @@ Algorithm described in _Hart, P. E.; Nilsson, N.J.; Raphael, B. (1968). "A Forma
 
 Efficient frontier detection algorithm inspired by the Expanding Wavefront Frontier Detection algorithm presented in _Quin, P., Alempijevic, A., Paul, G., & Liu, D. (2014, January). Expanding wavefront frontier detection: An approach for efficiently detecting frontier cells. In Australasian Conference on Robotics and Automation, ACRA._, but made faster through the implementation of an [RTree](https://it.wikipedia.org/wiki/R-tree) able to detect the only frontiers expanded by the robot at each iteration.
 
-<img src="https://github.com/mattianeroni/space-exploration/blob/main/images/frontier.png" >
+<img src="https://github.com/mattianeroni/space-exploration/blob/main/images/frontier.png"  width="50%" height="50%">
 
 
 
