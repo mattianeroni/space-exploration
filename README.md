@@ -26,7 +26,7 @@ Efficient path finding algorithm generally described as a natural evolution of D
 
 Algorithm described in _Hart, P. E.; Nilsson, N.J.; Raphael, B. (1968). "A Formal Basis for the Heuristic Determination of Minimum Cost Paths". IEEE Transactions on Systems Science and Cybernetics. 4 (2): 100–7._
 
-<img src="https://github.com/mattianeroni/space-exploration/blob/main/images/astar.gif" width="800" height="380">
+<img src="https://github.com/mattianeroni/space-exploration/blob/main/images/astar.gif" width="50%" height="50%">
 
 
 
