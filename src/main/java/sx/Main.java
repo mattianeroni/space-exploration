@@ -47,9 +47,9 @@ public class Main
                 {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
                 { 0,  0,  0,  0,  0,  0,  1,  1, -1, -1},
                 { 0,  0,  0,  0,  0,  0,  0,  1, -1, -1},
-                { 0,  0,  0,  0,  0,  0,  0,  0, -1, -1},
-                { 0,  0,  0,  0,  0,  0,  0,  0, -1, -1},
-                { 0,  0,  0,  0,  0,  0,  0,  0, -1, -1},
+                { 0,  0,  0,  0,  1,  0,  0,  0, -1, -1},
+                { 0,  0,  0,  1,  1,  1,  0,  0, -1, -1},
+                { 0,  0,  0,  0,  1,  0,  0,  0, -1, -1},
                 { 0,  0,  0,  0,  0,  0,  0,  0, -1, -1},
                 { 0,  0,  0,  0,  0,  0,  0,  0, -1, -1},
                 { 0,  0,  0,  0,  0,  0,  0,  0, -1, -1},
@@ -60,7 +60,7 @@ public class Main
         Vec2i center = new Vec2i(5, 5);
 
         //int[][] newGrid = GridMerger.rotateGrid(grid, center, (float) Math.PI / 2.4f );
-        int[][] newGrid = GridMerger.translateGrid(grid, new Vec2i(-1, +2));
+        int[][] newGrid = GridMerger.translateGrid(grid, new Vec2i(0, -5));
 
         plotGrid(grid);
         System.out.println("-----------------------------------");

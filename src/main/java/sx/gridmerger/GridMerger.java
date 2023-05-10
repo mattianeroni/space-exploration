@@ -80,14 +80,18 @@ public interface GridMerger
         // Not covered positions are considered unknown
         for (int[] ints : newGrid) Arrays.fill(ints, -1);
 
-        int minX = Math.abs(translation.x);
-        int minY = Math.abs(translation.y);
-        int maxX = Math.min(grid.length, grid.length + translation.x);
-        int maxY = Math.min(grid[0].length, grid[0].length + translation.y);
+        // Compute translation
+        for (int x = 0; x < grid.length; x++) {
+            for (int y = 0; y < grid[0].length; y++) {
 
-        for (int x = minX; x < maxX; x++)
-            for (int y = minY; y < maxY; y++)
-                newGrid[x - translation.x][y - translation.y] = grid[x][y];
+                int tx = x + translation.x;
+                int ty = y + translation.y;
+
+                if (tx >= 0 && tx < grid.length && ty >= 0 && ty < grid[0].length)
+                    newGrid[tx][ty] = grid[x][y];
+
+            }
+        }
 
         return newGrid;
     }
