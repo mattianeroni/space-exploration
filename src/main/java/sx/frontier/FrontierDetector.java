@@ -7,6 +7,21 @@ import java.util.List;
 public interface FrontierDetector
 {
 
+    /*
+    ================================================================================================================
+
+        Interface for frontier detection algorithms. All algorithms should implement this
+        interface in order to be tested by the FrontierDetectorTester.
+
+        The currently implemented ones are:
+            - An instance of this class represents a customized implementation
+              of Wavefront Frontier Detection algorithm.
+              Which in enhanced using a QuadTree to a faster detection of the frontiers
+              that should be extended.
+
+    ================================================================================================================
+    */
+
     /* Method to require a new computation of frontiers */
     void computeDetection();
 

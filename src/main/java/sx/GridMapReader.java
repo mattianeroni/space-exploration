@@ -6,10 +6,6 @@ import java.util.Scanner;
 
 public class GridMapReader
 {
-    // The bravery. Over this value of accuracy, elements in ROS map
-    // are considered obstacles.
-    static int BRAVERY = 90;
-
 
     /* Read a new grid map */
     public static int[][] readMap (File file, int sizeX, int sizeY) throws IOException
@@ -46,15 +42,10 @@ public class GridMapReader
         int[][] Bgrid = new int[grid.length][grid[0].length];
 
         for (int i = 0; i < grid.length; i++)
-        {
             for (int j = 0; j < grid[0].length; j++)
-            {
-
                 if (grid[i][j] > bravery)
                     Bgrid[i][j] = 1;
 
-            }
-        }
         return Bgrid;
     }
 

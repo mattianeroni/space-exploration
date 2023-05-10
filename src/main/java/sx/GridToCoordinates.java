@@ -12,8 +12,8 @@ public class GridToCoordinates
         2-dimensional space.
     */
 
-    LinkedList<Vec2f> path;
-    float cellSize;
+    LinkedList<Vec2f> path;     // Final computed path of spatial coordinates
+    float cellSize;             // The size of a cell
 
     public GridToCoordinates (float cellSize)
     {
@@ -22,6 +22,7 @@ public class GridToCoordinates
     }
 
 
+    /* Translate a path expressed in cells on the grid map in a path of spatial coordinates */
     public LinkedList<Vec2f> convert (LinkedList<Vec2i> originalPath)
     {
         for (Vec2i position : originalPath)

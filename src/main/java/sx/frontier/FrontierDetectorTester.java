@@ -154,14 +154,14 @@ public class FrontierDetectorTester extends PApplet
             {
                 if (grid[i][j] == 1)
                 {
-                    fill(90);
-                    stroke(90);
+                    fill(70);
+                    stroke(70);
                     strokeWeight(1);
                     ellipse(i * cellSize + (float) cellSize / 2.0f, j * cellSize + (float) cellSize / 2.0f, ballSize, ballSize);
                 } else if (grid[i][j] == -1)
                 {
-                    fill(120);
-                    stroke(120);
+                    fill(140);
+                    stroke(140);
                     strokeWeight(1);
                     ellipse(i * cellSize + (float) cellSize / 2.0f, j * cellSize + (float) cellSize / 2.0f, ballSize, ballSize);
                 }
