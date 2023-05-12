@@ -10,6 +10,7 @@ import sx.frontier.FrontierDetectorTester;
 import sx.frontier.WavefrontFrontierDetector;
 import sx.gridmerger.GridMerger;
 import sx.gridmerger.StochasticGridMerger;
+import sx.gridmerger.Transform;
 import sx.pathfind.*;
 import processing.core.PApplet;
 import sx.pathsmoother.GeometricSmoother;
@@ -23,12 +24,10 @@ public class Main
 {
 
     /*
-
         NOTE: All this program assumes the following standard for grid maps:
             - 0: free space
             - -1: unknown space
             - 1: obstacle
-
     */
 
     public static void main (String[] args)
@@ -43,26 +42,32 @@ public class Main
 
         // Create the grid map
         int[][] grid = {
-                {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
-                {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
-                { 0,  0,  0,  0,  0,  0,  1,  1, -1, -1},
-                { 0,  0,  0,  0,  0,  0,  0,  1, -1, -1},
-                { 0,  0,  0,  0,  1,  0,  0,  0, -1, -1},
-                { 0,  0,  0,  1,  1,  1,  0,  0, -1, -1},
-                { 0,  0,  0,  0,  1,  0,  0,  0, -1, -1},
-                { 0,  0,  0,  0,  0,  0,  0,  0, -1, -1},
-                { 0,  0,  0,  0,  0,  0,  0,  0, -1, -1},
-                { 0,  0,  0,  0,  0,  0,  0,  0, -1, -1},
+                { -1, -1, -1, -1, -1, -1, -1, -1,  0,  0},
+                { -1, -1, -1, -1, -1, -1, -1, -1,  0,  0},
+                { -1,  0,  0,  0,  0,  0,  1,  1,  0,  0},
+                { -1,  0,  0,  0,  0,  0,  0,  1,  0,  0},
+                { -1,  0,  0,  0,  1,  0,  0,  0,  0,  0},
+                { -1,  0,  0,  1,  1,  1,  0,  0,  0,  0},
+                { -1,  0,  0,  0,  1,  0,  0,  0,  0,  0},
+                { -1,  0,  0,  0,  0,  0,  0,  0,  0,  0},
+                { -1,  0,  0,  0,  0,  0,  0,  0,  0,  0},
+                { -1,  0,  0,  0,  0,  0,  0,  0,  0,  0},
         };
 
 
-        Vec2i source = new Vec2i(10, 10);
+        //Vec2i source = new Vec2i(10, 10);
         Vec2i center = new Vec2i(5, 5);
+        float angle = (float) Math.PI / 2.0f;
+        Vec2i translation = new Vec2i(-2, 0);
 
-        //int[][] newGrid = GridMerger.rotateGrid(grid, center, (float) Math.PI / 2.4f );
-        int[][] newGrid = GridMerger.translateGrid(grid, new Vec2i(0, -5));
+        int[][] rotGrid = GridMerger.rotateGrid(grid, center, angle);
+        int[][] tranGrid = GridMerger.translateGrid(grid, translation);
+        int[][] newGrid = GridMerger.translateGrid( GridMerger.rotateGrid(grid, center, angle ), translation);
+        int[][] nGrid = GridMerger.transformGrid(grid, new Transform(translation,  center, angle));
 
         plotGrid(grid);
+        System.out.println("-----------------------------------");
+        plotGrid(nGrid);
         System.out.println("-----------------------------------");
         plotGrid(newGrid);
     }

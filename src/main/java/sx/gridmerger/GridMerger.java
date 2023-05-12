@@ -32,6 +32,7 @@ public interface GridMerger
     }
 
 
+
     /*
         Rotate a full grid map according to a rotation center and an angle expressed in radians
         NOTE: The new grid map is always of the same shape of the first one. We never resize the
@@ -72,6 +73,10 @@ public interface GridMerger
 
 
 
+    /*
+        Translate a full grid.
+        NOTE: The values outside borders are lost.
+    */
     static int[][] translateGrid (int[][] grid, Vec2i translation)
     {
         // Init a new grid
@@ -80,15 +85,52 @@ public interface GridMerger
         // Not covered positions are considered unknown
         for (int[] ints : newGrid) Arrays.fill(ints, -1);
 
+        int minX = Math.max(translation.x, 0);
+        int minY = Math.max(translation.y, 0);
+        int maxX = Math.min(grid.length, grid.length + translation.x);
+        int maxY = Math.min(grid[0].length, grid[0].length + translation.y);
+
         // Compute translation
-        for (int x = 0; x < grid.length; x++) {
-            for (int y = 0; y < grid[0].length; y++) {
+        for (int x = minX; x < maxX; x++)
+            for (int y = minY; y < maxY; y++)
+                newGrid[x][y] = grid[x - translation.x][y - translation.y];
 
-                int tx = x + translation.x;
-                int ty = y + translation.y;
+        return newGrid;
+    }
 
-                if (tx >= 0 && tx < grid.length && ty >= 0 && ty < grid[0].length)
-                    newGrid[tx][ty] = grid[x][y];
+
+
+    /*
+        Translate and rotate at the same time a grid map.
+
+        NOTE: The values outside borders are lost.
+        NOTE: This is more efficient than rotating and translating in two different steps.
+    */
+    static int[][] transformGrid (int[][] grid, Transform transform)
+    {
+        // Init a new grid
+        int[][] newGrid = new int[grid.length][grid[0].length];
+
+        // Not covered positions are considered unknown
+        for (int[] ints : newGrid) Arrays.fill(ints, -1);
+
+        float s = (float) Math.sin(transform.angle);
+        float c = (float) Math.cos(transform.angle);
+
+        // Compute translation
+        for (int x = 0; x < grid.length; x++)
+        {
+            for (int y = 0; y < grid[0].length; y++)
+            {
+
+                int rotatedX = Math.round((x - transform.center.x) * c - (y - transform.center.y) * s + transform.center.x);
+                int rotatedY = Math.round((x - transform.center.x) * s + (y - transform.center.y) * c + transform.center.y);
+
+                int finalX = rotatedX + transform.translation.x;
+                int finalY = rotatedY + transform.translation.y;
+
+                if (finalX >= 0 && finalX < grid.length && finalY >= 0 && finalY < grid[0].length)
+                    newGrid[finalX][finalY] = grid[x][y];
 
             }
         }

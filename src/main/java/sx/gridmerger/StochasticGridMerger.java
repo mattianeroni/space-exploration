@@ -2,7 +2,6 @@ package sx.gridmerger;
 
 
 
-
 public class StochasticGridMerger implements GridMerger
 {
     /*
