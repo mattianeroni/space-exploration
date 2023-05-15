@@ -85,6 +85,7 @@ public interface GridMerger
         // Not covered positions are considered unknown
         for (int[] ints : newGrid) Arrays.fill(ints, -1);
 
+        // Define boundaries before to make less iterations
         int minX = Math.max(translation.x, 0);
         int minY = Math.max(translation.y, 0);
         int maxX = Math.min(grid.length, grid.length + translation.x);
@@ -122,10 +123,11 @@ public interface GridMerger
         {
             for (int y = 0; y < grid[0].length; y++)
             {
-
+                // Rotate
                 int rotatedX = Math.round((x - transform.center.x) * c - (y - transform.center.y) * s + transform.center.x);
                 int rotatedY = Math.round((x - transform.center.x) * s + (y - transform.center.y) * c + transform.center.y);
 
+                // Translate
                 int finalX = rotatedX + transform.translation.x;
                 int finalY = rotatedY + transform.translation.y;
 
@@ -137,5 +139,6 @@ public interface GridMerger
 
         return newGrid;
     }
+
 
 }

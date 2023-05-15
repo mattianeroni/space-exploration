@@ -54,23 +54,42 @@ public class Main
                 { -1,  0,  0,  0,  0,  0,  0,  0,  0,  0},
         };
 
-
         //Vec2i source = new Vec2i(10, 10);
         Vec2i center = new Vec2i(5, 5);
         float angle = (float) Math.PI / 2.0f;
         Vec2i translation = new Vec2i(-2, 0);
 
-        int[][] rotGrid = GridMerger.rotateGrid(grid, center, angle);
-        int[][] tranGrid = GridMerger.translateGrid(grid, translation);
-        int[][] newGrid = GridMerger.translateGrid( GridMerger.rotateGrid(grid, center, angle ), translation);
-        int[][] nGrid = GridMerger.transformGrid(grid, new Transform(translation,  center, angle));
+        int[][] t1grid = GridMerger.translateGrid(grid, new Vec2i(-1, -1));
+        int[][] t2grid = GridMerger.translateGrid(grid, new Vec2i(-2, -2));
+        int[][] rgrid = GridMerger.rotateGrid(grid, center, angle);
+        //int[][] trGrid = GridMerger.rotateGrid( GridMerger.translateGrid(grid, translation), center, angle);
+        //int[][] rtGrid = GridMerger.translateGrid( GridMerger.rotateGrid(grid, center, angle ), translation);
+        //int[][] nGrid = GridMerger.transformGrid(grid, new Transform(translation,  center, angle));
+
+        StochasticGridMerger merger = new StochasticGridMerger();
+        merger.setFirstGrid(grid);
+        merger.setSecondGrid(grid);
+        float s = merger.computeDistance();
+        System.out.println(s);
+
+        merger.setSecondGrid(t1grid);
+        float s1 = merger.computeDistance();
+        System.out.println(s1);
+
+        merger.setSecondGrid(t2grid);
+        float s2 = merger.computeDistance();
+        System.out.println(s2);
+
+        /*plotGridFloat(merger.dmap_obstacle_m1);
+        System.out.println("---------------------");
+        plotGridFloat(merger.dmap_obstacle_m2);
+        System.out.println("---------------------");
 
         plotGrid(grid);
-        System.out.println("-----------------------------------");
-        plotGrid(nGrid);
-        System.out.println("-----------------------------------");
-        plotGrid(newGrid);
+        System.out.println("---------------------");
+        plotGrid(t2grid);*/
     }
+
 
 
     /* Method to make a beauty plot of a grid map */
