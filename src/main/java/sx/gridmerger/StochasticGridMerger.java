@@ -1,17 +1,13 @@
 package sx.gridmerger;
 
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import sx.Vec2i;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.LinkedList;
 
 
-public class StochasticGridMerger implements GridMerger
+public class StochasticGridMerger
 {
     /*
         An instance of this class represents the implementation of the algorithm
@@ -27,18 +23,14 @@ public class StochasticGridMerger implements GridMerger
     */
 
 
-    public int steps;                       // The number of iterations computed
-    public int memorySize;                  // The number of configurations considered in mean and covariance calculation
-    public float mu, cov;                   // Mean and covariance used to generate a new sample
+    public int steps;                        // The number of iterations computed
+    public int memorySize;                   // The number of configurations considered in mean and covariance calculation
+    public float mu, cov;                    // Mean and covariance used to generate a new sample
 
-    public LinkedList<Pair<Transform,Float>> memory;    // The last configurations considered in mean and covariance calculation
+    public LimitedSizeSet<Solution> memory;  // The last configurations considered in mean and covariance calculation
 
-    public Transform current;                // The currently considered transform
-    public Transform best;                   // The best transform found so far
-    public float currentDist;                // The distance between the reference matrix and the transformed matrix
-                                             // after applying the current transform
-    public float bestDist;                   // The distance between the reference matrix and the transformed matrix
-                                             // after applying the best transform
+    public Solution current;                 // The currently considered transform
+    public Solution best;                    // The best transform found so far
 
     public float acceptanceFactor;           // If the acceptance is under this threshold, there is not enough overlap
                                              // between grid maps to compute a global grid map.
@@ -47,10 +39,9 @@ public class StochasticGridMerger implements GridMerger
 
     public int[][] grid;                     // The reference grid map --i.e., the one usually kept as it is
 
-    public int[][] dmap_free_ref;            // The distances map relative to free positions in reference grid map
-    public int[][] dmap_obstacle_ref;        // The distances map relative to obstacles in reference grid map
+    public int[][] dmap_free_ref;            // The distances map relative to free positions in reference grid map (computed only once)
+    public int[][] dmap_obstacle_ref;        // The distances map relative to obstacles in reference grid map (computed only once)
 
-    public int agreement, disagreement;     // Lastly computed agreement and disagreement
 
 
     // Time format used for logging
@@ -58,30 +49,17 @@ public class StochasticGridMerger implements GridMerger
 
 
 
-    public StochasticGridMerger()
-    {
-
-    }
-
-
-    public StochasticGridMerger (int steps, int memorySize, float mu_init, float cov_init, float acceptanceFactor, float cLock)
+    public StochasticGridMerger (int memorySize, float acceptanceFactor, float cLock, int steps)
     {
         this.steps = steps;
         this.memorySize = memorySize;
-        this.mu = mu_init;
-        this.cov = cov_init;
+        this.memory = new LimitedSizeSet<>(memorySize);
 
         this.cLock = cLock;
         this.acceptanceFactor = acceptanceFactor;
 
-        this.agreement = 0;
-        this.disagreement = 0;
-
-        this.memory = new LinkedList<>();
         this.current = null;
         this.best = null;
-        this.currentDist = Float.POSITIVE_INFINITY;
-        this.bestDist = Float.POSITIVE_INFINITY;
     }
 
 
@@ -135,27 +113,25 @@ public class StochasticGridMerger implements GridMerger
     }
 
 
-    /* Compute the acceptance indicator according to current agreement and disagreement */
-    public float acceptanceIndicator ()
+    /* It defines if there is enough overlap to consider a solution acceptable */
+    public boolean isAccepted (Solution solution)
     {
-        if (agreement + disagreement == 0)
-            return 0.0f;
-        return 1.0f - (agreement / (agreement + disagreement));
+        return solution.acceptanceIndicator() > acceptanceFactor;
     }
 
 
-    /* It defines if there is enough overlap to consider the merging acceptable */
-    public boolean isAccepted ()
+    /*
+        Compute the distance between the reference grid map and the transformed grid map (i.e., secondGrid),
+        after applying the transform passed as argument.
+        :param secondGrid:
+        :param transform:
+    */
+    public Solution computeTransform (int[][] secondGrid, Transform transform)
     {
-        return acceptanceIndicator() > acceptanceFactor;
-    }
-
-
-    /* Compute the distance between the reference grid map and the transformed grid map passed as argument */
-    public float computeDistance (int[][] m)
-    {
-        //System.out.println("[" + timef.format(new Date()) + "][INFO] Computing similarities");
         int X = grid.length, Y = grid[0].length;
+
+        // Apply the transform
+        int[][] transformedGrid = GridTransformer.transformGrid(secondGrid, transform);
 
         // Initialization of distances map matrices
         int[][] dmap_free = new int[X][Y];
@@ -171,8 +147,8 @@ public class StochasticGridMerger implements GridMerger
         {
             for (int y = 0; y < Y; y++)
             {
-                dmap_free[x][y] = (m[x][y] == 0) ? 0 : LARGE_NUMBER;
-                dmap_obstacle[x][y] = (m[x][y] == 1) ? 0 : LARGE_NUMBER;
+                dmap_free[x][y] = (transformedGrid[x][y] == 0) ? 0 : LARGE_NUMBER;
+                dmap_obstacle[x][y] = (transformedGrid[x][y] == 1) ? 0 : LARGE_NUMBER;
             }
         }
 
@@ -203,7 +179,7 @@ public class StochasticGridMerger implements GridMerger
         int N_obstacle_m1 = 0, N_obstacle_m2 = 0;
 
         // Reset agreeemnt and disagreement
-        agreement = 0; disagreement = 0;
+        int agreement = 0, disagreement = 0;
 
         for (int x = 0; x < X; x++)
         {
@@ -222,22 +198,22 @@ public class StochasticGridMerger implements GridMerger
                     N_obstacle_m1++;
                 }
 
-                if (m[x][y] == 0)
+                if (transformedGrid[x][y] == 0)
                 {
                     d_m2_m1_free += dmap_free_ref[x][y];
                     N_free_m2++;
                 }
 
-                if (m[x][y] == 1)
+                if (transformedGrid[x][y] == 1)
                 {
                     d_m2_m1_obstacle += dmap_obstacle_ref[x][y];
                     N_obstacle_m2++;
                 }
 
                 // Update agreeement and disagreement
-                if (grid[x][y] != -1 && m[x][y] != -1 && grid[x][y] == m[x][y])
+                if (grid[x][y] != -1 && transformedGrid[x][y] != -1 && grid[x][y] == transformedGrid[x][y])
                     agreement++;
-                if (grid[x][y] != -1 && m[x][y] != -1 && grid[x][y] != m[x][y])
+                if (grid[x][y] != -1 && transformedGrid[x][y] != -1 && grid[x][y] != transformedGrid[x][y])
                     disagreement++;
             }
         }
@@ -254,53 +230,55 @@ public class StochasticGridMerger implements GridMerger
         float overlap = disagreement - agreement;
 
         // Return the distance
-        return fi + cLock * overlap;
+        return new Solution(transform, fi + cLock * overlap, agreement, disagreement);
     }
-
-
-    /* Method for caching a new transform in memory (only the best memorySize are kept) */
-    /*
-    public void remember (Transform transform, float distance)
-    {
-        if (memory.size() < memorySize)
-            memory.add(new ImmutablePair<>(transform, distance));
-        else
-        {
-            for (Pair solution : memory)
-            {
-                if ( (float) solution.getRight() > distance )
-            }
-        }
-    }
-    */
 
 
     /*
       Initialization with an iterative almost-exahaustive approach.
-
         :param minT: Lowest bound translation
         :param maxT: Highest bound translation
         :param step: Translation step
         :param angle: Rotation step
     */
-    public void init (int[][] transformedGrid, int minT, int maxT, int step, float angle)
+    public void exhaustiveSearch (int[][] secondGrid, int minT, int maxT, int stepT, float angle)
     {
         // Set rotation center in the middle of reference grid map
         Vec2i center = new Vec2i((int) (grid.length / 2.0f), (int) (grid[0].length / 2.0f));
 
+        // Initialise the current and best solutions
+        this.current = computeTransform(secondGrid, new Transform(0, 0, center, 0.0f));
+        this.best = current;
+
+        // Initialise the memory of N best explored solutions
+        this.memory = new LimitedSizeSet<>(memorySize);
+        memory.add(best);
+
         // Test all defined combinations
-        for (int translationX = minT; translationX < maxT; translationX += step)
-
-            for (int translationY = minT; translationY < maxT; translationY += step)
-
+        for (int translationX = minT; translationX < maxT; translationX += stepT)
+        {
+            for (int translationY = minT; translationY < maxT; translationY += stepT)
+            {
                 for (float rotation = 0.0f; rotation < (float) Math.PI * 2.0f; rotation += angle)
                 {
 
+                    // Measure the effect of the transform
                     Transform transform = new Transform(translationX, translationY, center, rotation);
-                    int[][] grid = GridMerger.transformGrid(transformedGrid, transform);
-                    float distance = computeDistance(grid);
+                    Solution sol = computeTransform(secondGrid, transform);
 
-                }
+                    System.out.println(transform.repr() + " - " + sol.acceptanceIndicator() + " - " + sol.distance + " - " + best.distance);
+
+                    // Eventually update the memory and the current best solution found so far
+                    memory.add(sol);
+                    if (sol.distance < best.distance)
+                    {
+                        current = sol;
+                        best = sol;
+                    }
+
+                }  // end rotations
+            }   // end y-translations
+        }   // end x-translations
 
     }
 

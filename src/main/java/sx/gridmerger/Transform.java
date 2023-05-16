@@ -51,4 +51,9 @@ public class Transform
         return Objects.hash(center.x, center.y, translation.x, translation.y, angle);
     }
 
+    public String repr()
+    {
+        return "Transform(" + translation.x + ", " + translation.y + ", " + angle + ")";
+    }
+
 }

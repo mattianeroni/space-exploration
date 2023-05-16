@@ -1,21 +1,14 @@
 package sx;
 
-import org.locationtech.jts.geom.Envelope;
-import org.locationtech.jts.index.SpatialIndex;
-import org.locationtech.jts.index.quadtree.Quadtree;
-import org.locationtech.jts.index.strtree.STRtree;
-import org.locationtech.jts.triangulate.quadedge.QuadEdgeSubdivision;
-import sx.frontier.Frontier;
 import sx.frontier.FrontierDetectorTester;
 import sx.frontier.WavefrontFrontierDetector;
-import sx.gridmerger.GridMerger;
+import sx.gridmerger.GridTransformer;
 import sx.gridmerger.Solution;
 import sx.gridmerger.StochasticGridMerger;
 import sx.gridmerger.Transform;
 import sx.pathfind.*;
 import processing.core.PApplet;
 import sx.pathsmoother.GeometricSmoother;
-import sx.pathsmoother.GradientAscent;
 
 import java.util.*;
 
@@ -48,54 +41,46 @@ public class Main
                 { -1,  0,  0,  0,  0,  0,  1,  1,  0,  0},
                 { -1,  0,  0,  0,  0,  0,  0,  1,  0,  0},
                 { -1,  0,  0,  0,  1,  0,  0,  0,  0,  0},
-                { -1,  0,  0,  1,  1,  1,  0,  0,  0,  0},
-                { -1,  0,  0,  0,  1,  0,  0,  0,  0,  0},
-                { -1,  0,  0,  0,  0,  0,  0,  0,  0,  0},
-                { -1,  0,  0,  0,  0,  0,  0,  0,  0,  0},
-                { -1,  0,  0,  0,  0,  0,  0,  0,  0,  0},
+                { -1,  0,  0,  1,  1,  1,  1,  0,  0,  0},
+                { -1,  0,  0,  0,  1,  0,  1,  0,  0,  0},
+                { -1,  0,  0,  0,  0,  0,  1,  0,  0,  0},
+                { -1,  0,  0,  0,  0,  0,  1,  0,  0,  0},
+                { -1,  1,  1,  1,  1,  1,  1,  0,  0,  0},
         };
 
-        grid = new int[10][10];
-        for (int[] ints : grid) Arrays.fill(ints, -1);
+        //grid = new int[10][10];
+        //for (int[] ints : grid) Arrays.fill(ints, -1);
 
         //Vec2i source = new Vec2i(10, 10);
         Vec2i center = new Vec2i(5, 5);
         float angle = (float) Math.PI / 2.0f;
         Vec2i translation = new Vec2i(-2, 0);
 
-        int[][] t1grid = GridMerger.translateGrid(grid, new Vec2i(-1, -1));
-        int[][] t2grid = GridMerger.translateGrid(grid, new Vec2i(-2, -2));
-        int[][] rgrid = GridMerger.rotateGrid(grid, center, angle);
+        //int[][] t1grid = GridTransformer.translateGrid(grid, new Vec2i(-1, -1));
+        //int[][] t2grid = GridTransformer.translateGrid(grid, new Vec2i(-2, -2));
+        int[][] rgrid = GridTransformer.transformGrid(grid, new Transform(-1, -2, center, 0.f));
         //int[][] trGrid = GridMerger.rotateGrid( GridMerger.translateGrid(grid, translation), center, angle);
         //int[][] rtGrid = GridMerger.translateGrid( GridMerger.rotateGrid(grid, center, angle ), translation);
         //int[][] nGrid = GridMerger.transformGrid(grid, new Transform(translation,  center, angle));
 
-        /*
-        StochasticGridMerger merger = new StochasticGridMerger();
+        StochasticGridMerger merger = new StochasticGridMerger(5, 0.97f, 0.0f, 1000);
         merger.setReferenceGrid(grid);
-        float s = merger.computeDistance(grid);
-        System.out.println(s);
-        System.out.println(merger.acceptanceIndicator());
-        System.out.println(merger.isAccepted());
 
-        float s1 = merger.computeDistance(t1grid);
-        System.out.println(s1);
 
-        float s2 = merger.computeDistance(t2grid);
-        System.out.println(s2);
+        /*
+        Solution sol = merger.computeTransform(rgrid, new Transform(+1, +2, center, 0.0f));
+        System.out.println(sol.distance + " - " + sol.agreement + " - " + sol.disagreement + " - " + sol.acceptanceIndicator());
+
+        sol = merger.computeTransform(rgrid, new Transform(0, 0, center, 0.0f));
+        System.out.println(sol.distance + " - " + sol.agreement + " - " + sol.disagreement + " - " + sol.acceptanceIndicator());
         */
 
-        Solution s1 = new Solution(new Transform(10,10, center, 1.2f), 10f);
-        Solution s2 = new Solution(new Transform(10,10, center, 1.2f), 19f);
+        merger.exhaustiveSearch(rgrid, -5, +5, 1, 8.0f);
+        //plotGrid(GridTransformer.transformGrid(grid, new Transform(0, 0, center, 0.0f)));
+        System.out.println("Best transform: " + merger.best.transform.repr());
+        System.out.println("Best distance: " + merger.best.distance);
 
-        TreeSet<Solution> s = new TreeSet<>();
-        s.add(s1);
-        s.add(s2);
 
-        System.out.println(s.first().distance);
-        System.out.println(s.last().distance);
-
-        System.out.println(s.first().compareTo(s.last()));
     }
 
 

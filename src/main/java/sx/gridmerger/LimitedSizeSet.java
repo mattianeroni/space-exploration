@@ -1,9 +1,10 @@
 package sx.gridmerger;
 
+import java.util.Iterator;
 import java.util.TreeSet;
 
 
-public class LimitedSizeSet<T extends Comparable<T>>
+public class LimitedSizeSet<T extends Comparable<T>> implements Iterable<T>
 {
     /*
         An instance of this class represents a limited size set where
@@ -18,6 +19,7 @@ public class LimitedSizeSet<T extends Comparable<T>>
 
     private int maxSize;            // The maximum number of elements that can be stored
     public TreeSet<T> elements;     // The store elements sorted from the lowest to the highest
+                                    // NOTE: TreeSet does not work on the hash value as HashSet
 
 
     public LimitedSizeSet (int maxSize)
@@ -53,4 +55,8 @@ public class LimitedSizeSet<T extends Comparable<T>>
     }
 
 
+    @Override
+    public Iterator<T> iterator() {
+        return elements.iterator();
+    }
 }

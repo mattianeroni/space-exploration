@@ -11,14 +11,32 @@ public class Solution implements Comparable<Solution>
         NOTE: No indication to the reference grid map or the transformed grid map is kept.
     */
 
-    public Transform transform;
-    public float distance;
+    public Transform transform;         // The transform that generated this solution
+    public float distance;              // The distance between the transformed grid map and the reference grid map
+                                        // used when the solution was generated
+    public int agreement;               // Number of known positions in which the transformed and the reference grid
+                                        // maps were equal to each other
+    public int disagreement;            // Number of known positions in which the transformed and the reference grid
+                                        // maps were different
 
 
-    public Solution (Transform transform, float distance)
+    public Solution (Transform transform, float distance, int agreement, int disagreement)
     {
         this.transform = transform;
         this.distance = distance;
+        this.agreement = agreement;
+        this.disagreement = disagreement;
+    }
+
+
+    /* Compute the acceptance indicator according to current agreement and disagreement */
+    public float acceptanceIndicator ()
+    {
+        if ( (agreement + disagreement) == 0)
+            return 0.0f;
+        // NOTE: In the paper it was
+        // return 1.0f - ( (float)agreement / (float)(agreement + disagreement));
+        return (float)agreement / (float)(agreement + disagreement);
     }
 
 
