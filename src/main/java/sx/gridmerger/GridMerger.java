@@ -54,6 +54,10 @@ public interface GridMerger
         {
             for (int y = 0; y < grid[0].length; y++)
             {
+                // Unknown regions does not need to be considered
+                if (grid[x][y] == -1)
+                    continue;
+
                 // Center does not need to be rotated
                 if (x == center.x && y == center.y)
                     continue;
@@ -123,6 +127,10 @@ public interface GridMerger
         {
             for (int y = 0; y < grid[0].length; y++)
             {
+                // Unknown regions does not need to be considered
+                if (grid[x][y] == -1)
+                    continue;
+
                 // Rotate
                 int rotatedX = Math.round((x - transform.center.x) * c - (y - transform.center.y) * s + transform.center.x);
                 int rotatedY = Math.round((x - transform.center.x) * s + (y - transform.center.y) * c + transform.center.y);

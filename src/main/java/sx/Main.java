@@ -9,6 +9,7 @@ import sx.frontier.Frontier;
 import sx.frontier.FrontierDetectorTester;
 import sx.frontier.WavefrontFrontierDetector;
 import sx.gridmerger.GridMerger;
+import sx.gridmerger.Solution;
 import sx.gridmerger.StochasticGridMerger;
 import sx.gridmerger.Transform;
 import sx.pathfind.*;
@@ -54,6 +55,9 @@ public class Main
                 { -1,  0,  0,  0,  0,  0,  0,  0,  0,  0},
         };
 
+        grid = new int[10][10];
+        for (int[] ints : grid) Arrays.fill(ints, -1);
+
         //Vec2i source = new Vec2i(10, 10);
         Vec2i center = new Vec2i(5, 5);
         float angle = (float) Math.PI / 2.0f;
@@ -66,28 +70,32 @@ public class Main
         //int[][] rtGrid = GridMerger.translateGrid( GridMerger.rotateGrid(grid, center, angle ), translation);
         //int[][] nGrid = GridMerger.transformGrid(grid, new Transform(translation,  center, angle));
 
+        /*
         StochasticGridMerger merger = new StochasticGridMerger();
-        merger.setFirstGrid(grid);
-        merger.setSecondGrid(grid);
-        float s = merger.computeDistance();
+        merger.setReferenceGrid(grid);
+        float s = merger.computeDistance(grid);
         System.out.println(s);
+        System.out.println(merger.acceptanceIndicator());
+        System.out.println(merger.isAccepted());
 
-        merger.setSecondGrid(t1grid);
-        float s1 = merger.computeDistance();
+        float s1 = merger.computeDistance(t1grid);
         System.out.println(s1);
 
-        merger.setSecondGrid(t2grid);
-        float s2 = merger.computeDistance();
+        float s2 = merger.computeDistance(t2grid);
         System.out.println(s2);
+        */
 
-        /*plotGridFloat(merger.dmap_obstacle_m1);
-        System.out.println("---------------------");
-        plotGridFloat(merger.dmap_obstacle_m2);
-        System.out.println("---------------------");
+        Solution s1 = new Solution(new Transform(10,10, center, 1.2f), 10f);
+        Solution s2 = new Solution(new Transform(10,10, center, 1.2f), 19f);
 
-        plotGrid(grid);
-        System.out.println("---------------------");
-        plotGrid(t2grid);*/
+        TreeSet<Solution> s = new TreeSet<>();
+        s.add(s1);
+        s.add(s2);
+
+        System.out.println(s.first().distance);
+        System.out.println(s.last().distance);
+
+        System.out.println(s.first().compareTo(s.last()));
     }
 
 
